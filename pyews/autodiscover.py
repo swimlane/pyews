@@ -1,28 +1,33 @@
 import requests
-import xmltodict, json
+from bs4 import BeautifulSoup
 from userconfiguration import UserConfiguration
+from exchangeversion import ExchangeVersion
 #from pyews.userconfiguration import UserConfiguration
-
-__EXCHANGE_VERSIONS__ = ['Office365','Exchange2016','Exchange2013_SP1', 'Exchange2013', 'Exchange2010_SP2', 'Exchange2010_SP1', 'Exchange2010']
 
 class Autodiscover(object):
     
-    def __init__(self, credentials=None, exchangeVersion='Office365'):
+    def __init__(self, credentials, exchangeVersion):
         if not credentials:
             raise AttributeError('Credentials object is required')
-        self.credentials = credentials
-        self._determine_autodiscover_url(exchangeVersion)
+        else:
+          self.credentials = credentials
+
+        if not exchangeVersion:
+            raise AttributeError('You must provide one of the following exchange versions: %s' % ExchangeVersion.EXCHANGE_VERSIONS)
+        else:
+            self.exchangeVersion = exchangeVersion
+
+        self._determine_autodiscover_url()
         self.invoke_autodiscover()
 
 
-    def _determine_autodiscover_url(self, location):
-        if location in __EXCHANGE_VERSIONS__:
-            if location is 'Office365':
+    def _determine_autodiscover_url(self):
+        if self.exchangeVersion in ExchangeVersion.EXCHANGE_VERSIONS:
+            if self.exchangeVersion is 'Office365' or 'Exchange2016':
                 self.exchangeVersion = 'Exchange2016'
                 self.autodiscoverUrl = 'https://outlook.office365.com/autodiscover/autodiscover.svc'
             else:
                 domain = self.credentials.domain
-                self.exchangeVersion = location
                 self.autodiscoverUrl = ["https://%s/autodiscover/autodiscover.svc" % domain, "https://autodiscover.%s/autodiscover/autodiscover.svc" % domain]
 
     def invoke_autodiscover(self):
@@ -33,11 +38,8 @@ class Autodiscover(object):
             self.autodiscoverUrl,
             data=soap_request, headers=headers, auth=(self.credentials.username, self.credentials.password)
             )
-        self.usersettings = self.configuration(response.content)
-
-    def configuration(self, content):
-        response_dict = xmltodict.parse(content)
-        return UserConfiguration(response_dict)
+        parsed_response = BeautifulSoup(response.content, 'xml')
+        self.usersettings = UserConfiguration(parsed_response)
 
     def _build_autodiscover_soap_request(self):
         return '''<?xml version="1.0" encoding="utf-8"?>

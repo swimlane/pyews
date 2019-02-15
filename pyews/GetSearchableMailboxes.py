@@ -1,52 +1,65 @@
 import requests
-from xml.etree import ElementTree
-import xmltodict, json
+from bs4 import BeautifulSoup
 from autodiscover import Autodiscover
+from exchangeversion import ExchangeVersion
 
 class GetSearchableMailboxes(object):
     
-    def __init__(self, credentials=None, autodiscover=True, exchangeVersion='Office365', ews_url=None):
-        if not credentials:
+    SOAP_REQUEST_HEADER = {'content-type': 'text/xml; charset=UTF-8'}
+
+    def __init__(self, credentials=None, autodiscover=True, exchangeVersion=None, ewsurl=None):
+        if credentials is None:
             raise AttributeError('Credentials object is required')
-        if autodiscover:
-            autodiscover = Autodiscover(credentials=credentials, exchangeVersion=exchangeVersion)
-            self._get_searchable_mailboxes(autodiscover, credentials)
-        elif ews_url is not None:
-            self._get_searchable_mailboxes(credentials=credentials, ewsurl=ews_url)
         else:
-            raise AttributeError('You must provide either an Autodiscover object or a ews_url')
+            self.credentials = credentials
+
+        if exchangeVersion is not None:
+            if exchangeVersion in ExchangeVersion.EXCHANGE_VERSIONS:
+                self.exchangeVersion = exchangeVersion
+            else:
+                raise AttributeError('If you are not using Autodiscover then you must provide one of the following exchange versions: %s' % ExchangeVersion.EXCHANGE_VERSIONS)
+        else:
+            raise AttributeError('If you are not using Autodiscover then you must provide one of the following exchange versions: %s' % ExchangeVersion.EXCHANGE_VERSIONS)
+
+        # setting default results list object
+        self.results = []
+
+        if autodiscover:
+            self.autodiscover = Autodiscover(self.credentials, self.exchangeVersion)
+            self.ewsurl = self.autodiscover.usersettings.ExternalEwsUrl
+            self.exchangeVersion = self.autodiscover.usersettings.exchangeVersion
+            self._get_searchable_mailboxes()
+        else:
+            if ewsurl is not None:
+                self.ewsurl = ewsurl
+            else:
+                raise AttributeError('If you are not using Autodiscover then you must provide an ewsurl')
+            
+            self._get_searchable_mailboxes()
 
 
-    def _get_searchable_mailboxes(self, autodiscover, credentials, exchangeVersion=None, ewsurl=None,):
-        if ewsurl is None:
-            ewsurl = autodiscover.usersettings.ExternalEwsUrl
-
-        if exchangeVersion is None:
-            exchangeVersion = autodiscover.usersettings.exchangeVersion
-
-        headers = {'content-type': 'text/xml; charset=UTF-8'}
-        soap_request = self._build_soap_request(exchangeVersion)
-        response = requests.post(ewsurl, data=soap_request, headers=headers, auth=(credentials.username, credentials.password))
-        self.parse_response(response.content)
+    def _get_searchable_mailboxes(self):
+        soap_request = self._build_soap_request()
+        response = requests.post(self.ewsurl, data=soap_request, headers=self.SOAP_REQUEST_HEADER, auth=(self.credentials.username, self.credentials.password))
+        parsed_response = BeautifulSoup(response.content, 'xml')
+        self.parse_response(parsed_response)
+        
       
-    def parse_response(self, content):
-        self.searchable_mailboxes = []
-        response_dict = xmltodict.parse(content)
-        if response_dict['s:Envelope']['s:Body']['GetSearchableMailboxesResponse']['ResponseCode'] == 'NoError':
-            for mailboxes in response_dict['s:Envelope']['s:Body']['GetSearchableMailboxesResponse']['SearchableMailboxes']['SearchableMailbox']:
-                self.searchable_mailboxes.append({
-                    'ReferenceId': mailboxes['ReferenceId'],
-                    'PrimarySmtpAddress': mailboxes['PrimarySmtpAddress'],
-                    'DisplayName': mailboxes['DisplayName'],
-                    'IsMembershipGroup': mailboxes['IsMembershipGroup'],
-                    'IsExternalMailbox': mailboxes['IsExternalMailbox'],
-                    'ExternalEmailAddress': mailboxes['ExternalEmailAddress'],
-                    'Guid': mailboxes['Guid']
+    def parse_response(self, parsed_response):
+        if parsed_response.find('ResponseCode').string == 'NoError':
+            for item in parsed_response.find_all('SearchableMailbox'):
+                self.results.append({
+                    'ReferenceId': item.ReferenceId.string,
+                    'PrimarySmtpAddress': item.PrimarySmtpAddress.string,
+                    'DisplayName': item.DisplayName.string,
+                    'IsMembershipGroup': item.IsMembershipGroup.string,
+                    'IsExternalMailbox': item.IsExternalMailbox.string,
+                    'ExternalEmailAddress': item.ExternalEmailAddress.string,
+                    'Guid': item.Guid.string
                 })
-                
 
 
-    def _build_soap_request(self, exchangeVersion):
+    def _build_soap_request(self):
         return '''<?xml version="1.0" encoding="UTF-8"?>
 <soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/"
                xmlns:t="http://schemas.microsoft.com/exchange/services/2006/types"
@@ -59,6 +72,6 @@ class GetSearchableMailboxes(object):
          <m:ExpandGroupMembership>true</m:ExpandGroupMembership>
       </m:GetSearchableMailboxes>
    </soap:Body>
-</soap:Envelope>''' % exchangeVersion
+</soap:Envelope>''' % self.exchangeVersion
 
     

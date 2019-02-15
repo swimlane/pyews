@@ -1,7 +1,8 @@
 
 class ExchangeVersion(object):
     
-    # List of build numbers here: https://technet.microsoft.com/en-gb/library/hh135098(v=exchg.150).aspx
+    # Borrowed from exchangelib: https://github.com/ecederstrand/exchangelib/blob/master/exchangelib/version.py#L54
+    # List of build numbers here: https://docs.microsoft.com/en-us/Exchange/new-features/build-numbers-and-release-dates?view=exchserver-2019 
     API_VERSION_MAP = {
         8: {
             0: 'Exchange2007',
@@ -22,9 +23,14 @@ class ExchangeVersion(object):
         }
     }
 
+    EXCHANGE_VERSIONS = ['Office365','Exchange2016', 'Exchange2013_SP1', 'Exchange2013', 'Exchange2010_SP2', 'Exchange2010_SP1', 'Exchange2010']
+
     def __init__(self, version):
         self.exchangeVersion = self._get_api_version(version)
 
     def _get_api_version(self, version):
-        ver = version.split('.')
-        return self.API_VERSION_MAP[int(ver[0])][int(ver[1])]
+        if version is '15.0.847.32':
+            return 'Exchange2013_SP1'
+        else:
+            ver = version.split('.')
+            return self.API_VERSION_MAP[int(ver[0])][int(ver[1])]

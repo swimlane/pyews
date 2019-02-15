@@ -1,4 +1,4 @@
-import xmltodict
+from bs4 import BeautifulSoup
 from exchangeversion import ExchangeVersion
 
 class UserConfiguration(object):
@@ -9,11 +9,11 @@ class UserConfiguration(object):
             self.get_exchange_version()
 
     def create_config(self, config):
-        #self.user_settings = {}
-        for setting in config['s:Envelope']['s:Body']['GetUserSettingsResponseMessage']['Response']['UserResponses']['UserResponse']['UserSettings']['UserSetting']:
-            setting_name = setting['Name']
-            setting_value = setting['Value']
-            setattr(self, setting_name, setting_value)
+        if config.find('ErrorCode').string == 'NoError':
+            for item in config.find_all('UserSetting'):
+                setting_name = item.Name.string
+                setting_value = item.Value.string
+                setattr(self, setting_name, setting_value)
 
     def get_exchange_version(self):
         self.exchangeVersion = ExchangeVersion(self.CasVersion).exchangeVersion

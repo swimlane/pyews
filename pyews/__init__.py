@@ -4,3 +4,4 @@ from pyews.GetSearchableMailboxes import GetSearchableMailboxes
 from pyews.userconfiguration import UserConfiguration
 from pyews.exchangeversion import ExchangeVersion
 from pyews.SearchMailboxes import SearchMailboxes
+from pyews.DeleteItem import DeleteItem
