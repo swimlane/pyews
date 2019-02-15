@@ -40,9 +40,16 @@ for mailbox in searchableMailboxes.searchable_mailboxes:
 
 # We can also search all mailboxes by either providing a list of mailboxes ourselves or using the results from GetSearchableMailboxes.
 # if you want to use Autodiscover then no need to provide a list of mailboxes, the SearchMailboxes class handles this.
-mailbox_search = SearchMailboxes.SearchMailboxes('subject:Account', credentials=creds)
-for results in mailbox_search.search_results:
-    print(results)
+mailbox_search = SearchMailboxes('subject:Account', credentials=creds, exchangeVersion='Office365')
+for results in mailbox_search.results:
+    print(results['Id'])
+
+# Added the ability to delete items based on item ids from a mailbox search
+delete_item_response = DeleteItem(
+    'AAMkAGZjOTlkOWExLTM2MDEtNGI3MS04ZDJiLTllNzgwNDQxMThmMABGAAAAAABdQG8UG7qjTKf0wCVbqLyMBwC6DuFzUH4qRojG/OZVoLCfAAAAAAEbAAC6DuFzUH4qRojG/OZVoLCfAAAOh+uUAAA=',
+    credentials=creds, exchangeVersion='Office365'
+)
+
 ```
 
 ## Notes
