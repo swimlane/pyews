@@ -23,7 +23,7 @@ class ExchangeVersion(object):
         }
     }
 
-    EXCHANGE_VERSIONS = ['Office365','Exchange2016', 'Exchange2013_SP1', 'Exchange2013', 'Exchange2010_SP2', 'Exchange2010_SP1', 'Exchange2010']
+    EXCHANGE_VERSIONS = ['Exchange2016', 'Exchange2013_SP1', 'Exchange2013', 'Exchange2010_SP2', 'Exchange2010_SP1', 'Exchange2010']
 
     def __init__(self, version):
         self.exchangeVersion = self._get_api_version(version)
@@ -34,3 +34,12 @@ class ExchangeVersion(object):
         else:
             ver = version.split('.')
             return self.API_VERSION_MAP[int(ver[0])][int(ver[1])]
+
+    @staticmethod
+    def valid_version(version):
+        if version is 'Office365':
+            return True
+        elif version in ExchangeVersion.EXCHANGE_VERSIONS:
+            return True
+        else:
+            return False

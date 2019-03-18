@@ -1,7 +1,7 @@
 import requests, re
-from GetSearchableMailboxes import GetSearchableMailboxes
-from exchangeversion import ExchangeVersion
-from autodiscover import Autodiscover
+from .getsearchablemailboxes import GetSearchableMailboxes
+from .exchangeversion import ExchangeVersion
+from .autodiscover import Autodiscover
 from bs4 import BeautifulSoup
 
 

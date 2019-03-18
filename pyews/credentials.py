@@ -2,12 +2,13 @@ import re
 
 class Credentials(object):
     
-    def __init__(self, username, password):
-        self.username = username
+    def __init__(self, email_address, password):
+        self.email_address = email_address
         self.password = password
-        self.domain = self.get_domain_from_username()
+        self.domain = self.get_domain_from_email_address()
 
-    def get_domain_from_username(self):
-        local, _, domain = self.username.partition('@')
-        match_object = re.match(r'(.+)\.', domain)
-        return match_object.group(1)
+
+    def get_domain_from_email_address(self):
+        local, _, domain = self.email_address.partition('@')
+        return domain
+   

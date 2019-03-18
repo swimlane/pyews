@@ -1,1 +1,4 @@
-bs4
+requests
+beautifulsoup4
+lxml
+pyyaml
