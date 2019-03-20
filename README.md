@@ -1,60 +1,162 @@
-# pyattck
-A Python package to interact with the both on-premises and Office 365 Exchange Web Services
+# pyews
+> A Python package to interact with Exchange Web Services
 
-## Status
-This package is currently under development and should be used internally only.
+[![NPM Version][npm-image]][npm-url]
+[![Build Status][travis-image]][travis-url]
+[![Downloads Stats][npm-downloads]][npm-url]
 
-## Current Capabilities
-Currently, this package has the following capabilities:
+`pyews` is a python package to interact with both Exchange 2010 to 2016 on-premises and Exchange Online (Office 365).  This package will wrap all Exchange Web Service endpoints, but currently is focused on providing eDiscovery endpoints. 
 
-* Autodiscover: Limited testing but is able to be used to determine an EWS URL using Exchange Autodiscover
-* GetSearchableMailboxes: Can retrieve a list of mailboxes to search 
-* SearchMailboxes: Can search mailboxes based on either a GetSearchMailboxes object or your own list of mailbox Reference Ids
+Currently this package supports the following endpoints:
 
-## Example Usage
+* Autodiscover
+* GetSearchableMailboxes
+* SearchMailboxes
+* DeleteItem
+* GetInboxRules
+* ResolveNames
 
+## Installation
+
+OS X & Linux:
+
+```sh
+pip install pyews
 ```
-import credentials
-import autodiscover
-import GetSearchableMailboxes
-import exchangeversion
-import xmltodict
-import SearchMailboxes
 
-# We first need to create a credential object
-creds = credentials.Credentials('hackathon@swimlaneresearchdev.onmicrosoft.com', 'password')
+Windows:
 
-# We provide that object to the Autodiscover service endpoint, which provides ewsurl and exchangeVersion attributes
-# additonally, when using Autodiscover it will create a UserSettings object which has additional information used throughout
-autodiscover = autodiscover.Autodiscover(credentials=creds)
-print(autodiscover.usersettings.ExternalEwsUrl)
+```sh
+pip install pyews
+```
 
-# as you can see the autodiscover.usersettings contains a CasVersion.  This is used to determine the exact ExchangeVersion needed for all SOAP request calls.
-exchVer = exchangeVersion.ExchangeVersion(autodiscover.usersettings.CasVersion)
-print(exchVer.exchangeVersion)
+## Usage example
 
-# We get can get all searchable mailboxes (automatically expanded) using the GetSearchableMailboxes endpoint
-searchableMailboxes = GetSearchableMailboxes.GetSearchableMailboxes(credentials=creds, autodiscover=autodiscover)
-for mailbox in searchableMailboxes.searchable_mailboxes:
-    print(mailbox)
+The first step in using pyews is that you need to create a userconfiguration object.  Think of this as all the connection information for Exchange Web Services.  An example of creating a userconfiguration using Office 365 Autodiscover is:
 
-# We can also search all mailboxes by either providing a list of mailboxes ourselves or using the results from GetSearchableMailboxes.
-# if you want to use Autodiscover then no need to provide a list of mailboxes, the SearchMailboxes class handles this.
-mailbox_search = SearchMailboxes('subject:Account', credentials=creds, exchangeVersion='Office365')
-for results in mailbox_search.results:
-    print(results['Id'])
+```python
+from pyews import UserConfiguration
 
-# Added the ability to delete items based on item ids from a mailbox search
-delete_item_response = DeleteItem(
-    'AAMkAGZjOTlkOWExLTM2MDEtNGI3MS04ZDJiLTllNzgwNDQxMThmMABGAAAAAABdQG8UG7qjTKf0wCVbqLyMBwC6DuFzUH4qRojG/OZVoLCfAAAAAAEbAAC6DuFzUH4qRojG/OZVoLCfAAAOh+uUAAA=',
-    credentials=creds, exchangeVersion='Office365'
+userconfig = UserConfiguration(
+   'myaccount@company.com',
+   'Password1234'
+)
+```
+
+If you would like to use an alternative autodiscover endpoint (or any alternative endpoint) then please provide one using the `endpoint` named paramter:
+
+```python
+from pyews import UserConfiguration
+
+userconfig = UserConfiguration(
+   'myaccount@company.com',
+   'Password1234',
+   endpoint='https://outlook.office365.com/autodiscover/autodiscover.svc'
+)
+```
+
+For more information about creating a `UserConfiguration` object, please see the full documentation here:
+
+Now that you have a `UserConfiguration` object, we can now use a Service Endpoint.  This example will demonstrate how to `GetSearchableMailboxes` then by using the `SearchMailboxes` we will search all those mailboxes.  The returned results will then be deleted (moved to Deleted Items folder) from Exchange.
+
+```python
+from pyews import UserConfiguration
+
+userconfig = UserConfiguration(
+   'myaccount@company.com',
+   'Password1234'
 )
 
+# get searchable mailboxes based on your accounts permissions
+referenceid_list = []
+for mailbox in GetSearchableMailboxes(userconfig).response:
+    referenceid_list.append(mailbox['ReferenceId'])
+
+# let's search all the referenceid_list items
+messages_found = []
+for search in SearchMailboxes('subject:account', userconfig, referenceid_list).response:
+    messages_found.append(search['MessageId'])
+    # we can print the results first if we want
+    print(search['Subject'])
+    print(search['MessageId'])
+    print(search['Sender'])
+    print(search['ToRecipients'])
+    print(search['CreatedTime'])
+    print(search['ReceivedTime'])
+    #etc.
+
+# if we wanted to now delete a specific message then we would call the DeleteItem class like this but we can also pass in the entire messages_found list
+deleted_message_response = DeleteItem(messages_found[2], userconfig).response
+
+print(deleted_message_response)
 ```
 
-## Notes
-```yaml
-   Name: pyews
-   Created by: Josh Rickard
-   Created Date: 02/14/2019
+The following is an example of the output returned when calling the above code:
+
+```output
+YOUR ACCOUNT IS ABOUT TO EXPIRE! UPGRADE NOW!!!
+AAMkAGZjOTlkOWExLTM2MDEtNGI3MS0..............
+Josh Rickard
+Research
+2019-02-28T18:28:36Z
+2019-02-28T18:28:36Z
+Upgrade Your Account!
+AAMkADAyNTZhNmMyLWNmZTctNDIyZC0..............
+Josh Rickard
+Josh Rickard
+2019-01-24T18:41:11Z
+2019-01-24T18:41:11Z
+New or modified user account information
+AAMkAGZjOTlkOWExLTM2MDEtNGI3MS04..............
+Microsoft Online Services Team
+Research
+2019-01-24T18:38:06Z
+2019-01-24T18:38:06Z
+[{'MessageText': 'Succesfull'}]
 ```
+
+_For more examples and usage, please refer to the [Wiki][wiki]._
+
+## Development setup
+
+I have provided a [Dockerfile](Dockerfile) with all the dependencies and it is currently calling `bin\pyews_test.py`.  If you want to test new features, I recommend that you use this Dockerfile instead of a virtualenv.  You can call the following to build a new container, but keep the dependencies unless they have changed in your requirements.txt or any other changes to the Dockerfile.
+
+```sh
+docker build --force-rm -t pyews .
+```
+
+To run the container, use the following:
+
+```sh
+docker run pyews
+```
+
+I am new to Unit Testing, but I am working on that as time permits.  If you would like to help, I wouldn't be sad about it. :)
+
+## Release History
+
+* 0.0.1
+    * Initial release of pyews and it is still considered a work in progress
+
+## Meta
+
+Josh Rickard – [@MSAdministrator](https://twitter.com/MSAdministrator) – rickardja@live.com
+
+Distributed under the MIT license. See ``LICENSE`` for more information.
+
+## Contributing
+
+1. Fork it (<https://github.com/msadministrator/pyews/fork>)
+2. Create your feature branch (`git checkout -b feature/fooBar`)
+3. Commit your changes (`git commit -am 'Add some fooBar'`)
+4. Push to the branch (`git push origin feature/fooBar`)
+5. Create a new Pull Request
+
+<!-- Markdown link & img dfn's 
+[npm-image]: https://img.shields.io/npm/v/datadog-metrics.svg?style=flat-square
+[npm-url]: https://npmjs.org/package/datadog-metrics
+[npm-downloads]: https://img.shields.io/npm/dm/datadog-metrics.svg?style=flat-square
+[travis-image]: https://img.shields.io/travis/dbader/node-datadog-metrics/master.svg?style=flat-square
+[travis-url]: https://travis-ci.org/dbader/node-datadog-metrics
+-->
+[wiki]: https://github.com/yourname/yourproject/wiki
