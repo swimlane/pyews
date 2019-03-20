@@ -1,7 +1,13 @@
 #from userconfiguration import UserConfiguration
 #from pyews.userconfiguration import UserConfiguration
-from .userconfiguration import UserConfiguration
+#from .userconfiguration import UserConfiguration
+#from .userconfiguration import UserConfiguration as UC
 #import userconfiguration as UserConfiguration
+#import userconfiguration as UC
+#import userconfiguration as UC
+
+from pyews import userconfiguration as UC
+#print(UC)
 from bs4 import BeautifulSoup
 
 class ServiceEndpoint(object):
@@ -19,7 +25,7 @@ class ServiceEndpoint(object):
 
     @userconfiguration.setter
     def userconfiguration(self, config):
-        if isinstance(config, UserConfiguration):
+        if isinstance(config, UC.UserConfiguration):
             self._userconfiguration = config
 
 

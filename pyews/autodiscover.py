@@ -1,7 +1,8 @@
 import requests
 from bs4 import BeautifulSoup
 
-from .exchangeversion import ExchangeVersion
+#import pyews.exchangeversion 
+from pyews.exchangeversion import ExchangeVersion
 
 class Autodiscover(object):
     
@@ -38,6 +39,7 @@ class Autodiscover(object):
         elif exchangeVersion is None and create_endpoint_list is False:
             raise AttributeError('You must either provide an exchange_version or direct this class to create a URL list for you')
         elif exchangeVersion is None and create_endpoint_list is True:
+            temp = self._autodiscover_endpoint_list(self.credentials.domain)
             self.endpoint = self._autodiscover_endpoint_list(self.credentials.domain)
             self._exchangeVersion = ExchangeVersion.EXCHANGE_VERSIONS
 

@@ -7,14 +7,14 @@ from .userconfiguration import UserConfiguration
 
 class GetSearchableMailboxes(ServiceEndpoint):
 
-    def __init__(self, userconfiguration): # credentials=None, autodiscover=True, exchangeVersion=None, ewsurl=None):
+    def __init__(self, userconfiguration):
 
         if (isinstance(userconfiguration, UserConfiguration)):
             self.userconfiguration = userconfiguration
             super(ServiceEndpoint, self).__init__()
         else:
             raise AttributeError('Please provide a UserConfiguration object')
-        
+
         self.ewsUrl = self.userconfiguration.ewsUrl
         self.exchangeVersion = self.userconfiguration.exchangeVersion
 

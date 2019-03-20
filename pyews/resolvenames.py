@@ -1,6 +1,6 @@
-from .serviceendpoint import ServiceEndpoint
-#import userconfiguration as UserConfiguration
-from .userconfiguration import UserConfiguration
+from pyews.serviceendpoint import ServiceEndpoint
+from pyews import userconfiguration as UC
+
 from bs4 import BeautifulSoup
 import requests
 
@@ -8,7 +8,7 @@ import requests
 class ResolveNames(ServiceEndpoint):
 
     def __init__(self, userconfiguration):
-        if (isinstance(userconfiguration, UserConfiguration)):
+        if (isinstance(userconfiguration, UC.UserConfiguration)):
             self.userconfiguration = userconfiguration
             super(ServiceEndpoint, self).__init__()
         else:

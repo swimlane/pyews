@@ -1,9 +1,11 @@
 import logging
 from bs4 import BeautifulSoup
-from .exchangeversion import ExchangeVersion
-from .credentials import Credentials
-from .autodiscover import Autodiscover
-from .resolvenames import ResolveNames
+
+
+from pyews.credentials import Credentials
+from pyews import resolvenames as RN
+from pyews.autodiscover import Autodiscover
+from pyews.exchangeversion import ExchangeVersion
 import requests
 
 
@@ -41,16 +43,16 @@ class UserConfiguration(object):
                     self.raw_soap = Autodiscover(self.credentials, create_endpoint_list=True).response
                     self.configuration = self.raw_soap
                 except:
-                    __LOGGER__.error('Unable to create configuration from Autodiscover service.', exec_info=True)
+                    __LOGGER__.error('Unable to create configuration from Autodiscover service.')
             elif exchangeVersion is not None:
                 try:
                     self.raw_soap = Autodiscover(self.credentials, exchangeVersion=self.exchangeVersion).response
                     self.configuration = self.raw_soap
                 except:
-                    __LOGGER__.error('Unable to create configuration from Autodiscover service.', exec_info=True)
+                    __LOGGER__.error('Unable to create configuration from Autodiscover service.')
         else:
             if ewsUrl:
-                self.raw_soap = ResolveNames(self).response
+                self.raw_soap = RN.ResolveNames(self).response
                 self.configuration = self.raw_soap
             else:
                 raise AttributeError('If you are not using Autodiscover then you must provide a ewsUrl and exchangeVersion.')
@@ -103,7 +105,7 @@ class UserConfiguration(object):
                 else:
                     self._exchangeVersion = value
             else:
-                raise AttributeError('You must provide one of the following exchange versions: %s' % ExchangeVersion.EXCHANGE_VERSIONS)
+                raise AttributeError('You must provide one of the following exchange versions: %s' % pyews.ExchangeVersion.EXCHANGE_VERSIONS)
 
     @property
     def ewsUrl(self):
@@ -126,14 +128,11 @@ class UserConfiguration(object):
 
     @configuration.setter
     def configuration(self, config):
-        #print(config)
-        print(config.find('ServerVersionInfo')['MajorVersion'])
         try:
             # Trying to determine if this is a response from a 
             # typical autodiscover response message
             if config.find('ErrorCode').string == 'NoError':
                 for item in config.find_all('UserSetting'):
-                    print(item.Name.string)
                     if (item.Name.string == 'CasVersion'):
                         self.exchangeVersion = ExchangeVersion(item.Value.string).exchangeVersion
                     elif (item.Name.string == 'ExternalEwsUrl'):
@@ -155,8 +154,6 @@ class UserConfiguration(object):
                     self.exchangeVersion = ExchangeVersion(ver).exchangeVersion
                     for item in config.find('ResolutionSet'):
                         for i in item.find('Mailbox'):
-                      #      print(i.name)
-                      #     print(i.string)
                             setattr(self, i.name, i.string)
                     for item in config.find('ResolutionSet'):
                         for i in item.find('Contact'):
