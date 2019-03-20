@@ -14,4 +14,4 @@ RUN python setup.py install
 #COPY . /app
 #WORKDIR /app
 
-CMD [ "python", "/app/test.py" ]
+CMD [ "python", "/app/bin/test.py" ]
