@@ -12,19 +12,28 @@
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 #
-# import os
-# import sys
-# sys.path.insert(0, os.path.abspath('.'))
+import os
+import shutil
+import sys
+from datetime import datetime
 
+os.chdir(os.path.dirname(__file__))
+#sys.path.remove('/Users/josh.rickard/_Swimlane/pyews/docs')
+#sys.path.remove('/Users/josh.rickard/_Swimlane')
+#sys.path.remove('/Users/josh.rickard/_Swimlane/pyews/pyews')
+#print(sys.path)
+#sys.path.append('/Users/josh.rickard/_Swimlane/pyews/pyews')
+sys.path.insert(0, os.path.abspath('..'))
+print(sys.path)
 
 # -- Project information -----------------------------------------------------
-
+import pyews
 project = 'pyews'
 copyright = '2019, Josh Rickard (@MSAdministrator)'
 author = 'Josh Rickard (@MSAdministrator)'
 
 # The short X.Y version
-version = ''
+version = '0.0.1'
 # The full version, including alpha/beta/rc tags
 release = '0.0.1'
 
@@ -44,7 +53,12 @@ extensions = [
     'sphinx.ext.coverage',
     'sphinx.ext.viewcode',
     'sphinx.ext.githubpages',
+    'sphinx.ext.napoleon',
 ]
+
+
+# autodoc content setting
+autoclass_content = 'init'
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
@@ -53,7 +67,9 @@ templates_path = ['_templates']
 # You can specify multiple suffix as a list of string:
 #
 # source_suffix = ['.rst', '.md']
-source_suffix = '.rst'
+source_suffix = {
+    '.rst': 'restructuredtext'
+}
 
 # The master toctree document.
 master_doc = 'index'
@@ -71,7 +87,7 @@ language = None
 exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
 
 # The name of the Pygments (syntax highlighting) style to use.
-pygments_style = None
+pygments_style = 'sphinx'
 
 
 # -- Options for HTML output -------------------------------------------------
@@ -100,7 +116,7 @@ html_static_path = ['_static']
 # default: ``['localtoc.html', 'relations.html', 'sourcelink.html',
 # 'searchbox.html']``.
 #
-# html_sidebars = {}
+html_sidebars = { '**': ['globaltoc.html', 'relations.html', 'sourcelink.html', 'searchbox.html'] }
 
 
 # -- Options for HTMLHelp output ---------------------------------------------
@@ -155,8 +171,8 @@ man_pages = [
 #  dir menu entry, description, category)
 texinfo_documents = [
     (master_doc, 'pyews', 'pyews Documentation',
-     author, 'pyews', 'One line description of project.',
-     'Miscellaneous'),
+     author, 'pyews', 'Python package for Exchange Web Services.',
+     'Exchange'),
 ]
 
 
