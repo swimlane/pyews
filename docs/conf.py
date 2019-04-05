@@ -18,16 +18,15 @@ import sys
 from datetime import datetime
 
 os.chdir(os.path.dirname(__file__))
-#sys.path.remove('/Users/josh.rickard/_Swimlane/pyews/docs')
-#sys.path.remove('/Users/josh.rickard/_Swimlane')
-#sys.path.remove('/Users/josh.rickard/_Swimlane/pyews/pyews')
-#print(sys.path)
-#sys.path.append('/Users/josh.rickard/_Swimlane/pyews/pyews')
 sys.path.insert(0, os.path.abspath('..'))
-print(sys.path)
 
 # -- Project information -----------------------------------------------------
 import pyews
+
+from pyews.configuration import (autodiscover, userconfiguration, configuration, credentials, impersonation, userconfiguration)
+from pyews.service import (deleteitem, getinboxrules, getsearchablemailboxes, resolvenames, searchmailboxes, searchquery, serviceendpoint)
+from pyews.utils import (exceptions, exchangeversion, logger)
+
 project = 'pyews'
 copyright = '2019, Josh Rickard (@MSAdministrator)'
 author = 'Josh Rickard (@MSAdministrator)'
