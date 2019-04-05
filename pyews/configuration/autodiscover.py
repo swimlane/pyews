@@ -10,6 +10,27 @@ class Autodiscover(object):
     The Autodiscover class can be used with both Office 365 and on-premises Exchange 2010 to 2016.
     Currently, it has been thoroughly tested with Office 365 but not so much with the on-premises versions of Exchange.
     
+    Example:
+        There two typical methods of using the Autodiscover class.  These behave slightly differently depending on your needs.
+            1. If you know the Autodiscover URL for your on-premises or Office 365 Exchange Autodiscover service then you can provide this directly
+            
+            .. code-block:: python
+
+               Autodiscover(
+                   credentialObj, 
+                   endpoint='https://outlook.office365.com/autodiscover/autodiscover.svc',
+                   exchangeVersion='Office365'
+               )
+
+            2. If you do not know the Autodiscover URL then you can set create_endpoint_list to True to have the Autodiscover class attempt to generate URL endpoints for you
+            
+            .. code-block:: python
+
+               Autodiscover(
+                   credentialObj,
+                   create_endpoint_list=True
+               )
+
     Args:
         credentials (Credentials): An object created using the Credentials class
         endpoint (str, optional): Defaults to None. If you want to specify a different Autodiscover endpoint then provide the url here
@@ -17,15 +38,10 @@ class Autodiscover(object):
         create_endpoint_list (bool, optional): Defaults to False. If you want the Autodiscover class to generate a list of endpoints to try based on a users email address
     
     Raises:
-            IncorrectParameters: An error occured by not passing the correct parameters into this class
-        ExchangeVersionError: An error occured when passing in an exchange version that is not supported
-        SoapResponseHasError: An error occured when parsing the SOAP response
+        IncorrectParameters: An error occurred by not passing the correct parameters into this class
+        ExchangeVersionError: An error occurred when passing in an exchange version that is not supported
+        SoapResponseHasError: An error occurred when parsing the SOAP response
 
-    Examples:
-
-        ::
-
-            #
     '''
 
     def __init__(self, credentials, endpoint=None, exchangeVersion=None, create_endpoint_list=False):
