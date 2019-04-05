@@ -1,13 +1,13 @@
 import logging
 from bs4 import BeautifulSoup
-
+import requests
 
 from pyews.configuration.configuration import Configuration
 from pyews.configuration.credentials import Credentials
 from pyews.configuration.autodiscover import Autodiscover
 from pyews.configuration.impersonation import Impersonation
 import pyews.utils.exceptions
-#import pyews.utils.exchangeversion
+
 import pyews.service.resolvenames
 from pyews.utils.exceptions import ObjectType
 from pyews.utils.exchangeversion import ExchangeVersion
