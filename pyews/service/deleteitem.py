@@ -50,7 +50,11 @@ class DeleteItem(ServiceEndpoint):
             ObjectType: An incorrect object type has been used
         '''
 
-        self.item = item
+    DELETE_TYPES = ['HardDelete', 'SoftDelete', 'MoveToDeletedItems']
+
+    def __init__(self, messageId, userconfiguration, delete_type=DELETE_TYPES[2]):
+
+        self.messageId = messageId
 
         super(DeleteItem, self).__init__(userconfiguration)
 
