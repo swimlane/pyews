@@ -6,17 +6,34 @@ from pyews.utils.exceptions import ObjectType, SoapResponseHasError, SoapAccessD
 
 
 class GetInboxRules (ServiceEndpoint):
+    '''Child class of doc:`serviceendpoint` that retrieves inbox (mailbox) rules for a specified email address.
 
-    def __init__(self, smtp_address, userconfiguration):
-        '''Child class of ServiceEndpoint that gets all available inbox rules for a specified email address
+    Examples:
+        To use any service class you must provide a :doc:`../configuration/userconfiguration` object first.
+        Like all service classes, you can access formatted properties from the EWS endpoint using the `response` property.
         
+        If you want to retrieve the inbox rules for a specific email address you must provide it when creating a GetInboxRules object.
+            
+        .. code-block:: python
+
+           userConfig = UserConfiguration(
+               'first.last@company.com',
+               'mypassword123'
+           )
+
+           inboxRules = GetInboxRules('first.last@company.com', userConfig)
+
         Args:
             smtp_address (str): The email address you want to get inbox rules for
-            userconfiguration (UserConfiguration): A UserConfiguration object created using the UserConfiguration class
+        userconfiguration (UserConfiguration): A :doc:`../configuration/userconfiguration` object created using the UserConfiguration class
         
         Raises:
+        SoapAccessDeniedError: Access is denied when attempting to use Exchange Web Services endpoint
+        SoapResponseHasError: An error occurred when parsing the SOAP response
             ObjectType: An incorrect object type has been used
         '''
+
+    def __init__(self, smtp_address, userconfiguration):
 
         self.email_address = smtp_address
 

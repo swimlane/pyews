@@ -7,13 +7,48 @@ from pyews.utils.exceptions import ObjectType, DeleteTypeError, SoapResponseHasE
 
 
 class SearchMailboxes(ServiceEndpoint):
+    '''Child class of :doc:`serviceendpoint` that is used to search mailboxes based on a search query, :doc:`../configuration/userconfiguration` object, and a single or list of mailbox ReferenceId's.  
     
-    def __init__(self, search_query, userconfiguration, mailbox_id, search_scope='All'):
-        '''Child class of ServiceEndpoint that is used to search mailboxes based on a search query, UserConfiguration object, and a single or list of mailbox ReferenceId's.  
+        Examples:
+            To use any service class you must provide a :doc:`../configuration/userconfiguration` object first.
+            Like all service classes, you can access formatted properties from the EWS endpoint using the `response` property.
         
+            The search query parameter takes a specific format, below are examples of different situations as well as comments that explain that situation:
+
+            .. code-block:: guess
+                   
+                   # Searching for a keyword in a subject
+                   # You can specify the word you are looking for as either `account` or `Account`
+                   searchQuery = 'subject:account'
+
+                   # Searching for an exact string in a subject
+                   searchQuery = 'subject:"Your Account is about to expire"'
+
+                   # Searching for a url in a email's body
+                   searchQuery = 'body:"https://google.com"'
+
+                   # You can combine your search query by adding grouping logical operators
+                   # Here is an example of searching for two subject strings and a body string match
+                   searchQuery = 'subject:(account OR phishing) AND body:"https://google.com"'
+
+            For more information take a look at Microsoft's documentation for their= `Advanced Query Syntax (AQS) <https://docs.microsoft.com/en-us/exchange/client-developer/web-service-reference/querystring-querystringtype>`_
+
+            
+            By passing in a search_query, :doc:`../configuration/userconfiguration` object, and a mailbox_id we can search that specific mailbox or a list of mailbox referenceIds
+
+            .. code-block:: python
+
+               userConfig = UserConfiguration(
+                   'first.last@company.com',
+                   'mypassword123'
+               )
+        
+               referenceId = '/o=ExchangeLabs/ou=Exchange Administrative Group (FYDIBOHF23SPDLT)/cn=Recipients/cn=5341a4228e8c433ba81b4b4b6d75e100-last.first'
+               searchResults = SearchMailboxes('subject:account', userConfig, referenceId)
+
         Args:
             search_query (str): A EWS QueryString.  More information can be found at https://docs.microsoft.com/en-us/exchange/client-developer/web-service-reference/querystring-querystringtype
-            userconfiguration (UserConfiguration): A UserConfiguration object created using the UserConfiguration class
+            userconfiguration (UserConfiguration): A :doc:`../configuration/userconfiguration` object created using the :doc:`../configuration/userconfiguration` class
             mailbox_id (str or list): A single or list of mailbox IDs to search.  This mailbox id is a ReferenceId
             search_scope (str, optional): Defaults to 'All'. The search scope for the provided mailbox ids.  The options are ['All', 'PrimaryOnly', 'ArchiveOnly']
         
@@ -21,6 +56,8 @@ class SearchMailboxes(ServiceEndpoint):
             ObjectType: An incorrect object type has been used
             SearchScopeError: The provided search scope is not one of the following options: ['All', 'PrimaryOnly', 'ArchiveOnly']
         '''
+
+    def __init__(self, search_query, userconfiguration, mailbox_id, search_scope='All'):
 
         self.search_query = search_query
         

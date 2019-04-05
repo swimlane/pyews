@@ -6,17 +6,33 @@ from pyews.utils.exceptions import ObjectType, SoapResponseHasError, SoapAccessD
 
 
 class ResolveNames(ServiceEndpoint):
-
-    def __init__(self, userconfiguration):
-        '''Child class of ServiceEndpoint that is used to resolve names based on the provided UserConfiguration object.  This class is used as an alternative to Autodiscover
+    '''Child class of :doc:`serviceendpoint` that is used to resolve names based on the provided :doc:`../configuration/userconfiguration` object.  This class is used as an alternative to :doc:`../configuration/autodiscover`
         since ResolveNames endpoint is a common endpoint across all versions of Microsoft Exchange & Office 365.
+
+        Examples:
+            To use any service class you must provide a :doc:`../configuration/userconfiguration` object first.
+            Like all service classes, you can access formatted properties from the EWS endpoint using the `response` property.
+            
+            By passing in a :doc:`../configuration/userconfiguration` object we can 
+                
+            .. code-block:: python
+
+               userConfig = UserConfiguration(
+                   'first.last@company.com',
+                   'mypassword123'
+               )
+        
+               messageId = 'AAMkAGZjOTlkOWExLTM2MDEtNGI3MS04ZDJiLTllNzgwNDQxMThmMABGAAAAAABdQG8UG7qjTKf0wCVbqLyMBwC6DuFzUH4qRojG/OZVoLCfAAAAAAEMAAC6DuFzUH4qRojG/OZVoLCfAAAu4Y9UAAA='
+               deleteItem = DeleteItem(messageId, userConfig)
         
         Args:
-            userconfiguration (UserConfiguration): A UserConfiguration object created using the UserConfiguration class
+            userconfiguration (UserConfiguration): A :doc:`../configuration/userconfiguration` object created using the :doc:`../configuration/userconfiguration` class
         
         Raises:
             ObjectType: An incorrect object type has been used
         '''
+
+    def __init__(self, userconfiguration):
 
         super(ResolveNames, self).__init__(userconfiguration)
         

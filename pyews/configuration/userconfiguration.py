@@ -11,19 +11,6 @@ import pyews.utils.exceptions
 import pyews.service.resolvenames
 from pyews.utils.exceptions import ObjectType
 from pyews.utils.exchangeversion import ExchangeVersion
-#from pyews.utils.exchangeversion import ExchangeVersion
-#from pyews.utils.exceptions import IncorrectParameters, CredentialsError, ExchangeVersionError, UserConfigurationError
-
-#import pyews.service.resolvenames as RC
-#from pyews.service.resolvenames import ResolveNames
-
-
-#from pyews import resolvenames as RN
-
-
-
-
-import requests
 
 
 __LOGGER__ = logging.getLogger(__name__)
@@ -31,6 +18,56 @@ __LOGGER__ = logging.getLogger(__name__)
 class UserConfiguration(object):
     '''UserConfiguration is the main class of pyews.  It is used by all other ServiceEndpoint parent and child classes.  
     This class represents how you authorize communication with all other SOAP requests throughout this package.
+        
+    Examples:
+
+        The UserConfiguration class is the main class used by all services, including the parent class of services called ServiceEndpoint. 
+
+        A UserConfiguration object contains detailed information about how to communicate to Exchange Web Services, as well as additional properties
+
+        The traditional UserConfiguration object can be created by just passing in a username and password.  This will attempt to connect using Autodiscover and will attempt every version of Exchange.
+
+            .. code-block:: python
+
+               userConfig = UserConfiguration(
+                   'first.last@company.com',
+                   'mypassword123'
+               )
+
+        If you the know the Exchange version you want to communicate with you can provide this information:
+
+            .. code-block:: python
+
+               userConfig = UserConfiguration(
+                   'first.last@company.com',
+                   'mypassword123',
+                   exchangeVersion='Office365'
+               )
+
+        If you do not wish to use Autodiscover then you can tell UserConfiguration to not use it by setting autodiscover to False and provide the ewsUrl instead
+
+            .. code-block:: python
+
+               userConfig = UserConfiguration(
+                   'first.last@company.com',
+                   'mypassword123',
+                   autodiscover=False,
+                   ewsUrl='https://outlook.office365.com/EWS/Exchange.asmx'
+               )
+
+        If you would like to use impersonation, you first need to create an Impersonation object and pass that into the UserConfiguration class when creating a user configuration object.
+
+            .. code-block:: python
+
+               impersonation = Impersonation(primarysmtpaddress='first.last@company.com')
+
+               userConfig = UserConfiguration(
+                   'first.last@company.com',
+                   'mypassword123',
+                   autodiscover=False,
+                   ewsUrl='https://outlook.office365.com/EWS/Exchange.asmx',
+                   impersonation=impersonation
+               )
         
     Args:
         username (str): An email address or username that you use to authenticate to Exchange Web Services

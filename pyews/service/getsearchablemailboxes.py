@@ -8,38 +8,41 @@ from pyews.utils.exceptions import ObjectType, SoapResponseHasError, SoapAccessD
 
 
 class GetSearchableMailboxes(ServiceEndpoint):
-
-    def __init__(self, userconfiguration):
         '''Child class of ServiceEndpoint that identifies all searchable mailboxes based on the provided UserConfiguration object's permissions
         
+    Example:
+        To use any service class you must provide a :doc:`../configuration/userconfiguration` object first.
+        Like all service classes, you can access formatted properties from the EWS endpoint using the `response` property.
+        
+        You can acquire 
+            
+        .. code-block:: python
+
+           userConfig = UserConfiguration(
+               'first.last@company.com',
+               'mypassword123'
+           )
+
+           searchableMailboxes = GetSearchableMailboxes(userconfig)
+
+        If you want to use a property from this object with another class then you can iterate through the list of of mailbox properties.
+        For example, if used in conjunction with the :doc:`searchmailboxes` you first need to create a list of mailbox ReferenceIds.
+
+        .. code-block:: python
+        
+           id_list = []
+           for id in searchableMailboxes.response:
+               id_list.append(id['ReferenceId'])
+           searchResults = SearchMailboxes('subject:"Phishing Email Subject"', userConfig, id_list)
+
+        
         Args:
-            userconfiguration (UserConfiguration): A UserConfiguration object created using the UserConfiguration class
-        
-        Raises:
-            ObjectType: An incorrect object type has been used
+        userconfiguration (UserConfiguration): A :doc:`../configuration/userconfiguration` object created using the :doc:`../configuration/userconfiguration` class
+    Raises:
+        SoapAccessDeniedError: Access is denied when attempting to use Exchange Web Services endpoint
+        SoapResponseHasError: An error occurred when parsing the SOAP response
+        ObjectType: An incorrect object type has been used
         '''
-        super(GetSearchableMailboxes, self).__init__(userconfiguration)
-
-        self.invoke()
-
-    @property
-    def raw_soap(self):
-        '''Returns the raw SOAP response
-        
-        Returns:
-            str: Raw SOAP XML response
-        '''
-        return self._raw_soap
-
-    @raw_soap.setter
-    def raw_soap(self, value):
-        '''Sets the raw soap and response from a SOAP request
-        
-        Args:
-            value (str): The response from a SOAP request
-        '''
-        self.response = value
-        self._raw_soap = value
 
     @property
     def response(self):
