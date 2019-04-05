@@ -7,7 +7,7 @@ from pyews.utils.exceptions import ObjectType, SoapResponseHasError, SoapAccessD
 
 class GetInboxRules (ServiceEndpoint):
     '''Child class of doc:`serviceendpoint` that retrieves inbox (mailbox) rules for a specified email address.
-
+    
     Examples:
         To use any service class you must provide a :doc:`../configuration/userconfiguration` object first.
         Like all service classes, you can access formatted properties from the EWS endpoint using the `response` property.
@@ -23,42 +23,25 @@ class GetInboxRules (ServiceEndpoint):
 
            inboxRules = GetInboxRules('first.last@company.com', userConfig)
 
-        Args:
-            smtp_address (str): The email address you want to get inbox rules for
+    Args:
+        smtp_address (str): The email address you want to get inbox rules for
         userconfiguration (UserConfiguration): A :doc:`../configuration/userconfiguration` object created using the UserConfiguration class
-        
-        Raises:
+
+    Raises:
         SoapAccessDeniedError: Access is denied when attempting to use Exchange Web Services endpoint
         SoapResponseHasError: An error occurred when parsing the SOAP response
-            ObjectType: An incorrect object type has been used
-        '''
-
+        ObjectType: An incorrect object type has been used
+    '''
+    
     def __init__(self, smtp_address, userconfiguration):
 
         self.email_address = smtp_address
 
         super(GetInboxRules, self).__init__(userconfiguration)
 
-        self.invoke()
-
-    @property
-    def raw_soap(self):
-        '''Returns the raw SOAP response
-        
-        Returns:
-            str: Raw SOAP XML response
-        '''
-        return self._raw_soap
-
-    @raw_soap.setter
-    def raw_soap(self, value):
-        '''Sets the raw soap and response from a SOAP request
-        
-        Args:
-            value (str): The response from a SOAP request
-        '''
-        self.response = value
-        self._raw_soap = value
+        self._soap_request = self.soap(self.email_address)
+        super(GetInboxRules, self).invoke(self._soap_request)
+        self.response = self.raw_soap
 
     @property
     def response(self):
@@ -99,29 +82,6 @@ class GetInboxRules (ServiceEndpoint):
                     
                 return_list.append(return_dict)
             self._response = return_list
-               
-
-    def invoke(self):
-        '''Used to invoke an GetInboxRules SOAP request
-        
-        Raises:
-            SoapResponseHasError: Raises an error when unable to parse a SOAP response
-        '''
-
-        soap_payload = self.soap(self.email_address)
-        r = requests.post(
-            self.userconfiguration.ewsUrl,
-            data=soap_payload, 
-            headers=self.SOAP_REQUEST_HEADER, 
-            auth=(self.userconfiguration.credentials.email_address, self.userconfiguration.credentials.password)
-        )
-        parsed_response = BeautifulSoup(r.content, 'xml')
-        if parsed_response.find('ResponseCode').string == 'NoError':
-            self.raw_soap = parsed_response
-        elif parsed_response.find('ResponseCode').string == 'ErrorAccessDenied':
-            raise SoapAccessDeniedError('%s' % parsed_response.find('MessageText').string)
-        else:
-            raise SoapResponseHasError('Unable to parse response from GetInboxRules')
 
 
     def soap(self, email_address):

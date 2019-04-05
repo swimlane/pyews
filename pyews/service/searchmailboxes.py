@@ -8,11 +8,11 @@ from pyews.utils.exceptions import ObjectType, DeleteTypeError, SoapResponseHasE
 
 class SearchMailboxes(ServiceEndpoint):
     '''Child class of :doc:`serviceendpoint` that is used to search mailboxes based on a search query, :doc:`../configuration/userconfiguration` object, and a single or list of mailbox ReferenceId's.  
-    
+        
         Examples:
             To use any service class you must provide a :doc:`../configuration/userconfiguration` object first.
             Like all service classes, you can access formatted properties from the EWS endpoint using the `response` property.
-        
+            
             The search query parameter takes a specific format, below are examples of different situations as well as comments that explain that situation:
 
             .. code-block:: guess
@@ -70,27 +70,9 @@ class SearchMailboxes(ServiceEndpoint):
         else:
             raise SearchScopeError('Please use the default SearchScope of All or specify PrimaryOnly or ArchiveOnly')
 
-        self.invoke()
-
-        
-    @property
-    def raw_soap(self):
-        '''Returns the raw SOAP response
-        
-        Returns:
-            str: Raw SOAP XML response
-        '''
-        return self._raw_soap
-
-    @raw_soap.setter
-    def raw_soap(self, value):
-        '''Sets the raw soap and response from a SOAP request
-        
-        Args:
-            value (str): The response from a SOAP request
-        '''
-        self.response = value
-        self._raw_soap = value
+        soap_request_body = self.soap(self.mailbox_list)
+        super(SearchMailboxes, self).invoke(soap_request_body)
+        self.response = self.raw_soap
 
     @property
     def response(self):
@@ -122,29 +104,6 @@ class SearchMailboxes(ServiceEndpoint):
                 return_list.append(return_dict)
             self._response = return_list
               
-
-    def invoke(self):
-        '''Used to invoke a SearchMailboxes SOAP request
-        
-        Raises:
-            SoapResponseHasError: Raises an error when unable to parse a SOAP response
-        '''
-
-        soap_payload = self.soap(self.mailbox_list)
-        r = requests.post(
-            self.userconfiguration.ewsUrl,
-            data=soap_payload, 
-            headers=self.SOAP_REQUEST_HEADER, 
-            auth=(self.userconfiguration.credentials.email_address, self.userconfiguration.credentials.password)
-        )
-        parsed_response = BeautifulSoup(r.content, 'xml')
-        if parsed_response.find('ResponseCode').string == 'NoError':
-            self.raw_soap = parsed_response
-        elif parsed_response.find('ResponseCode').string == 'ErrorAccessDenied':
-            raise SoapAccessDeniedError('%s' % parsed_response.find('MessageText').string)
-        else:
-            raise SoapResponseHasError('Unable to parse response from SearchMailboxes')
-
 
     def soap(self, mailbox):
         '''Creates the SOAP XML message body

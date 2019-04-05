@@ -8,12 +8,12 @@ from pyews.utils.exceptions import ObjectType, SoapResponseHasError, SoapAccessD
 
 
 class GetSearchableMailboxes(ServiceEndpoint):
-        '''Child class of ServiceEndpoint that identifies all searchable mailboxes based on the provided UserConfiguration object's permissions
-        
+    '''Child class of ServiceEndpoint that identifies all searchable mailboxes based on the provided UserConfiguration object's permissions
+    
     Example:
         To use any service class you must provide a :doc:`../configuration/userconfiguration` object first.
         Like all service classes, you can access formatted properties from the EWS endpoint using the `response` property.
-        
+
         You can acquire 
             
         .. code-block:: python
@@ -29,20 +29,28 @@ class GetSearchableMailboxes(ServiceEndpoint):
         For example, if used in conjunction with the :doc:`searchmailboxes` you first need to create a list of mailbox ReferenceIds.
 
         .. code-block:: python
-        
+           
            id_list = []
            for id in searchableMailboxes.response:
                id_list.append(id['ReferenceId'])
            searchResults = SearchMailboxes('subject:"Phishing Email Subject"', userConfig, id_list)
 
-        
-        Args:
+
+    Args:
         userconfiguration (UserConfiguration): A :doc:`../configuration/userconfiguration` object created using the :doc:`../configuration/userconfiguration` class
     Raises:
         SoapAccessDeniedError: Access is denied when attempting to use Exchange Web Services endpoint
         SoapResponseHasError: An error occurred when parsing the SOAP response
         ObjectType: An incorrect object type has been used
-        '''
+    '''
+
+    def __init__(self, userconfiguration):
+    
+        super(GetSearchableMailboxes, self).__init__(userconfiguration)
+
+        soap_request_body = self.soap()
+        super(GetSearchableMailboxes, self).invoke(soap_request_body)
+        self.response = self.raw_soap
 
     @property
     def response(self):
@@ -73,28 +81,6 @@ class GetSearchableMailboxes(ServiceEndpoint):
                     'Guid': item.Guid.string
                 })
         self._response = return_list
-
-    def invoke(self):
-        '''Used to invoke an GetSearchableMailboxes SOAP request
-        
-        Raises:
-            SoapResponseHasError: Raises an error when unable to parse a SOAP response
-        '''
-
-        soap_payload = self.soap()
-        r = requests.post(
-            self.userconfiguration.ewsUrl,
-            data=soap_payload, 
-            headers=self.SOAP_REQUEST_HEADER, 
-            auth=(self.userconfiguration.credentials.email_address, self.userconfiguration.credentials.password)
-        )
-        parsed_response = BeautifulSoup(r.content, 'xml')
-        if parsed_response.find('ResponseCode').string == 'NoError':
-            self.raw_soap = parsed_response
-        elif parsed_response.find('ResponseCode').string == 'ErrorAccessDenied':
-            raise SoapAccessDeniedError('%s' % parsed_response.find('MessageText').string)
-        else:
-            raise SoapResponseHasError('Unable to parse response from GetSearchableMailboxes')
 
     def soap(self):
         '''Creates the SOAP XML message body

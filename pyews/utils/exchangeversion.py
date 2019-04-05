@@ -16,7 +16,7 @@ class ExchangeVersion(object):
             To verify an ExchangeVersion is supported, you can view the supported version by access the EXCHANGE_VERSIONS attribute
 
             .. code-block:: python
-    
+                   
                versions = ExchangeVersion('15.20.5').EXCHANGE_VERSIONS
                print(versions)
 
@@ -52,11 +52,6 @@ class ExchangeVersion(object):
     EXCHANGE_VERSIONS = ['Exchange2016', 'Exchange2013_SP1', 'Exchange2013', 'Exchange2010_SP2', 'Exchange2010_SP1', 'Exchange2010']
 
     def __init__(self, version):
-        '''Used to validate compatiable Exchange Versions across multiple service endpoints
-        
-        Args:
-            version (str): An Exchange Version number.  Example: 15.20.5 = Exchange2016
-        '''
 
         self.exchangeVersion = self._get_api_version(version)
 

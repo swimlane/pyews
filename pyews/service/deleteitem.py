@@ -12,9 +12,9 @@ class DeleteItem(ServiceEndpoint):
     Examples:
         To use any service class you must provide a :doc:`../configuration/userconfiguration` object first.
         Like all service classes, you can access formatted properties from the EWS endpoint using the `response` property.
-
-        If you want to move a single message to the `Deleted Items` folder then provide a string value of the message ID.  The default `delete_type` is to move a message to the `Deleted Items` folder.
         
+        If you want to move a single message to the `Deleted Items` folder then provide a string value of the message ID.  The default `delete_type` is to move a message to the `Deleted Items` folder.
+            
         .. code-block:: python
 
            userConfig = UserConfiguration(
@@ -39,16 +39,16 @@ class DeleteItem(ServiceEndpoint):
 
            deleteItem = DeleteItem(messageId, userConfig, delete_type='HardDelete')
            
-        Args:
+    Args:
         messageId (list or str): An email MessageId to delete
-            userconfiguration (UserConfiguration): A UserConfiguration object created using the UserConfiguration class
-            delete_type (str, optional): Defaults to MoveToDeletedItems. Specify the DeleteType.  Available options are ['HardDelete', 'SoftDelete', 'MoveToDeletedItems']
-        
-        Raises:
+        userconfiguration (UserConfiguration): A UserConfiguration object created using the UserConfiguration class
+        delete_type (str, optional): Defaults to MoveToDeletedItems. Specify the DeleteType.  Available options are ['HardDelete', 'SoftDelete', 'MoveToDeletedItems']
+
+    Raises:
         SoapAccessDeniedError: Access is denied when attempting to use Exchange Web Services endpoint
         SoapResponseHasError: An error occurred when parsing the SOAP response
-            ObjectType: An incorrect object type has been used
-        '''
+        ObjectType: An incorrect object type has been used
+    '''
 
     DELETE_TYPES = ['HardDelete', 'SoftDelete', 'MoveToDeletedItems']
 
@@ -63,27 +63,10 @@ class DeleteItem(ServiceEndpoint):
         else:
             raise DeleteTypeError('You must provide one of the following delete types: %s' % self.DELETE_TYPES)
 
-        self.invoke()
+        self._soap_request = self.soap(self.messageId)
+        super(DeleteItem, self).invoke(self._soap_request)
+        self.response = self.raw_soap
 
-
-    @property
-    def raw_soap(self):
-        '''Returns the raw SOAP response
-        
-        Returns:
-            str: Raw SOAP XML response
-        '''
-        return self._raw_soap
-
-    @raw_soap.setter
-    def raw_soap(self, value):
-        '''Sets the raw soap and response from a SOAP request
-        
-        Args:
-            value (str): The response from a SOAP request
-        '''
-        self.response = value
-        self._raw_soap = value
 
     @property
     def response(self):
@@ -114,30 +97,6 @@ class DeleteItem(ServiceEndpoint):
                 'MessageText': 'Succesfull'
             })
         self._response = return_list      
-
-
-    def invoke(self):
-        '''Used to invoke an Autodiscover SOAP request
-        
-        Raises:
-            SoapResponseHasError: Raises an error when unable to parse a SOAP response
-        '''
-
-        soap_payload = self.soap(self.item)
-        r = requests.post(
-            self.userconfiguration.ewsUrl,
-            data=soap_payload, 
-            headers=self.SOAP_REQUEST_HEADER, 
-            auth=(self.userconfiguration.credentials.email_address, self.userconfiguration.credentials.password)
-        )
-        parsed_response = BeautifulSoup(r.content, 'xml')
-        if parsed_response.find('ResponseCode').string == 'NoError':
-            self.raw_soap = parsed_response
-        elif parsed_response.find('ResponseCode').string == 'ErrorAccessDenied':
-            raise SoapAccessDeniedError('%s' % parsed_response.find('MessageText').string)
-        else:
-            raise SoapResponseHasError('Unable to parse response from DeleteItem')
-
 
     def soap(self, item):
         '''Creates the SOAP XML message body
