@@ -1,3 +1,7 @@
+
+pass
+
+
 import re
 import datetime
 
@@ -73,5 +77,3 @@ class SearchQuery(object):
             if kind not in valid_kind:
                 raise ValueError("results: kind must be one of %r." % valid_kind)
 '''    
-
-print(SearchQuery('kind:email'))
