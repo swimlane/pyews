@@ -7,3 +7,4 @@ This documentation provides details about the UserConfiguration class within the
 This class is used in the `ServiceEndpoint` parent class and all inherited child classes.
 
 .. autoclass:: pyews.UserConfiguration
+   :members:

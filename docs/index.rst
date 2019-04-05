@@ -1,19 +1,44 @@
 Welcome to pyews's documentation!
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+::
+
+    .______   ____    ____  ___________    __    ____   _______.
+    |   _  \  \   \  /   / |   ____\   \  /  \  /   /  /       |
+    |  |_)  |  \   \/   /  |  |__   \   \/    \/   /  |   (----`
+    |   ___/    \_    _/   |   __|   \            /    \   \    
+    |  |          |  |     |  |____   \    /\    / .----)   |   
+    | _|          |__|     |_______|   \__/  \__/  |_______/    
+                                                                
+
+
     A Python package to interact with Exchange Web Services
 
 
-`pyews` is a python package to interact with both Exchange 2010 to 2016 on-premises and Exchange Online (Office 365).  This package will wrap all Exchange Web Service endpoints, but currently is focused on providing eDiscovery endpoints. 
 
-Currently this package supports the following endpoints:
+**pyews** is a cross platform python package to interact with both Exchange 2010 to 2016 on-premises and Exchange Online (Office 365).  This package will wrap all Exchange Web Service endpoints, but currently is focused on providing eDiscovery endpoints. 
 
-* Autodiscover
-* GetSearchableMailboxes
-* SearchMailboxes
-* DeleteItem
-* GetInboxRules
-* ResolveNames
+************
+Features
+************
+
+**pyews** has the following notable features in it's current release:
+
+* Autodiscover support
+* Delegation support
+* Impersonation support
+* Retrieve all mailboxes that can be searched based on credentials provided
+* Search a list of (or single) mailboxes in your Exchange environment using all supported search attributes
+* Delete email items from mailboxes in your Exchange environment
+* Retrieve mailbox inbox rules for a specific account
+
+Currently this package supports the following :doc:`services/serviceendpoint`:'s:
+
+* :doc:`services/deleteitem`
+* :doc:`services/getinboxrules`
+* :doc:`services/getsearchablemailboxes`
+* :doc:`services/resolvenames`
+* :doc:`services/searchmailboxes`
 
 ^^^^^^^^^^^^^^
 Installation
@@ -41,7 +66,7 @@ Windows:
 Usage example
 """""""""""""""""
 
-The first step in using pyews is that you need to create a userconfiguration object.  Think of this as all the connection information for Exchange Web Services.  An example of creating a userconfiguration using Office 365 Autodiscover is:
+The first step in using **pyews** is that you need to create a :doc:`configuration/userconfiguration` object.  Think of this as all the connection information for Exchange Web Services.  An example of creating a :doc:`configuration/userconfiguration` using Office 365 Autodiscover is:
 
 .. code-block:: python
    :linenos:
@@ -54,7 +79,7 @@ The first step in using pyews is that you need to create a userconfiguration obj
    )
 
 
-If you would like to use an alternative autodiscover endpoint (or any alternative endpoint) then please provide one using the `endpoint` named paramter:
+If you would like to use an alternative :doc:`configuration/autodiscover` endpoint (or any alternative endpoint) then please provide one using the `endpoint` named parameter:
 
 .. code-block:: python
    :linenos:
@@ -68,13 +93,13 @@ If you would like to use an alternative autodiscover endpoint (or any alternativ
    )
 
 
-For more information about creating a `UserConfiguration` object, please see the full documentation here:
+For more information about creating a :doc:`configuration/userconfiguration` object, please see the full documentation.
 
-Now that you have a `UserConfiguration` object, we can now use a Service Endpoint.  This example will demonstrate how you can identify which mailboxes you have access to by using the `GetSearchableMailboxes` EWS endpoint.
+Now that you have a :doc:`configuration/userconfiguration` object, we can now use a :doc:`services/serviceendpoint`.  This example will demonstrate how you can identify which mailboxes you have access to by using the :doc:`services/getsearchablemailboxes` EWS endpoint.
 
-Once you havec identified a list of mailbox reference ids, then you can begin searching all of those mailboxes by using the `SearchMailboxes` EWS endpoint.
+Once you have identified a list of mailbox reference ids, then you can begin searching all of those mailboxes by using the :doc:`services/searchmailboxes` EWS endpoint.
 
-The returned results will then be deleted (moved to Deleted Items folder) from Exchange using the `DeleteItem` EWS endpoint.
+The returned results will then be deleted (moved to Deleted Items folder) from Exchange using the :doc:`services/deleteitem` EWS endpoint.
 
 .. code-block:: python
    :linenos:
@@ -136,13 +161,16 @@ The following is an example of the output returned when calling the above code:
    [{'MessageText': 'Succesfull'}]
 
 
-*For more examples and usage, please refer to the [Wiki][wiki].*
+**For more examples and usage, please refer to the individual class documentation**
+
+* :doc:`services/root`
+* :doc:`configuration/root`
 
 """"""""""""""""""
 Development setup
 """"""""""""""""""
 
-I have provided a [Dockerfile](Dockerfile) with all the dependencies and it is currently calling `bin\pyews_test.py`.  If you want to test new features, I recommend that you use this Dockerfile instead of a virtualenv.  You can call the following to build a new container, but keep the dependencies unless they have changed in your requirements.txt or any other changes to the Dockerfile.
+I have provided a `Dockerfile <https://github.com/swimlane/pyews/blob/master/Dockerfile>`_ with all the dependencies and it is currently calling `bin\pyews_test.py`.  If you want to test new features, I recommend that you use this `Dockerfile <https://github.com/swimlane/pyews/blob/master/Dockerfile>`_.  You can call the following to build a new container, but keep the dependencies unless they have changed in your requirements.txt or any other changes to the `Dockerfile <https://github.com/swimlane/pyews/blob/master/Dockerfile>`_.
 
 .. code-block:: guess
    :linenos:
@@ -171,7 +199,7 @@ Release History
 Meta
 """""""""""""""""
 
-Josh Rickard – [@MSAdministrator](https://twitter.com/MSAdministrator) – rickardja@live.com
+Josh Rickard – `@MSAdministrator <https://twitter.com/MSAdministrator>`_
 
 Distributed under the MIT license. See ``LICENSE`` for more information.
 
@@ -179,27 +207,19 @@ Distributed under the MIT license. See ``LICENSE`` for more information.
 Contributing
 """""""""""""""""
 
-1. Fork it (<https://github.com/msadministrator/pyews/fork>)
+1. Fork it (<https://github.com/swimlane/pyews/fork>)
 2. Create your feature branch (`git checkout -b feature/fooBar`)
 3. Commit your changes (`git commit -am 'Add some fooBar'`)
 4. Push to the branch (`git push origin feature/fooBar`)
 5. Create a new Pull Request
 
-<!-- Markdown link & img dfn's 
-[npm-image]: https://img.shields.io/npm/v/datadog-metrics.svg?style=flat-square
-[npm-url]: https://npmjs.org/package/datadog-metrics
-[npm-downloads]: https://img.shields.io/npm/dm/datadog-metrics.svg?style=flat-square
-[travis-image]: https://img.shields.io/travis/dbader/node-datadog-metrics/master.svg?style=flat-square
-[travis-url]: https://travis-ci.org/dbader/node-datadog-metrics
--->
-[wiki]: https://github.com/yourname/yourproject/wiki
-
 
 .. toctree::
    :maxdepth: 2
 
-   services
-   userconfiguration
+   services/root
+   configuration/root
+   utils/root
 
 Indices and tables
 ==================
