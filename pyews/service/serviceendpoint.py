@@ -1,7 +1,10 @@
+import re
+import requests
+
 from bs4 import BeautifulSoup
-import requests, re
 
 from pyews.utils.exceptions import SoapResponseHasError, SoapAccessDeniedError
+
 
 class ServiceEndpoint(object):
     
@@ -17,7 +20,6 @@ class ServiceEndpoint(object):
         self.userconfiguration = userconfiguration
 
         self.results = []
-
 
     @property
     def userconfiguration(self):

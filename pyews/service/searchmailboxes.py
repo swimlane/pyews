@@ -1,4 +1,6 @@
-import requests, re
+import re
+import requests
+
 from bs4 import BeautifulSoup
 
 from .serviceendpoint import ServiceEndpoint
@@ -65,7 +67,7 @@ class SearchMailboxes(ServiceEndpoint):
 
         self.mailbox_list = mailbox_id
 
-        if (search_scope in ['All', 'PrimaryOnly', 'ArchiveOnly']):
+        if search_scope in ['All', 'PrimaryOnly', 'ArchiveOnly']:
             self.search_scope = search_scope
         else:
             raise SearchScopeError('Please use the default SearchScope of All or specify PrimaryOnly or ArchiveOnly')
@@ -103,7 +105,6 @@ class SearchMailboxes(ServiceEndpoint):
                         })
                 return_list.append(return_dict)
             self._response = return_list
-              
 
     def soap(self, mailbox):
         '''Creates the SOAP XML message body
@@ -114,7 +115,7 @@ class SearchMailboxes(ServiceEndpoint):
         Returns:
             str: Returns the SOAP XML request body
         '''
-        if (self.userconfiguration.impersonation):
+        if self.userconfiguration.impersonation:
             impersonation_header = self.userconfiguration.impersonation.header
         else:
             impersonation_header = ''
@@ -144,7 +145,6 @@ class SearchMailboxes(ServiceEndpoint):
    </soap:Body>
 </soap:Envelope>''' % (self.userconfiguration.exchangeVersion, impersonation_header, self.search_query, mailbox_search_scope)
 
-
     def _mailbox_search_scope(self,  mailbox):
         '''Creates a MailboxSearchScope XML element from a single or list of mailbox ReferenceIds
 
@@ -152,7 +152,7 @@ class SearchMailboxes(ServiceEndpoint):
             str: Returns the MailboxSearchScope SOAP XML element(s)
         '''
         mailbox_soap_element = ''
-        if (isinstance(mailbox, list)):
+        if isinstance(mailbox, list):
             for item in mailbox:
                 mailbox_soap_element += '''<t:MailboxSearchScope>
         <t:Mailbox>%s</t:Mailbox>

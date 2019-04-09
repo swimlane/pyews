@@ -1,4 +1,6 @@
-import requests, re
+import re
+import requests
+
 from bs4 import BeautifulSoup
 
 from .serviceendpoint import ServiceEndpoint
@@ -67,7 +69,6 @@ class DeleteItem(ServiceEndpoint):
         super(DeleteItem, self).invoke(self._soap_request)
         self.response = self.raw_soap
 
-
     @property
     def response(self):
         '''DeleteItem SOAP response dictionary
@@ -107,7 +108,7 @@ class DeleteItem(ServiceEndpoint):
         Returns:
             str: Returns the SOAP XML request body
         '''
-        if (self.userconfiguration.impersonation):
+        if self.userconfiguration.impersonation:
             impersonation_header = self.userconfiguration.impersonation.header
         else:
             impersonation_header = ''
@@ -129,7 +130,6 @@ class DeleteItem(ServiceEndpoint):
     </DeleteItem>
   </soap:Body>
 </soap:Envelope>''' % (self.userconfiguration.exchangeVersion, impersonation_header, self.delete_type, delete_item_soap_element)
-        
 
     def _delete_item_soap_string(self, item):
         '''Creates a ItemId XML element from a single or list of items
@@ -138,7 +138,7 @@ class DeleteItem(ServiceEndpoint):
             str: Returns the ItemId SOAP XML element(s)
         '''
         item_soap_string = ''
-        if (isinstance(item, list)):
+        if isinstance(item, list):
             for i in item:
                 item_soap_string += '''<t:ItemId Id="%s"/>''' % i
         else:

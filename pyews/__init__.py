@@ -1,7 +1,6 @@
 from pyews.utils.logger import setup_logging
 setup_logging()
 
-
 from .configuration.userconfiguration import UserConfiguration
 from .configuration.autodiscover import Autodiscover
 from .configuration.credentials import Credentials
@@ -13,4 +12,7 @@ from .service.getsearchablemailboxes import GetSearchableMailboxes
 from .service.searchmailboxes import SearchMailboxes
 from .service.searchquery import SearchQuery
 from .utils.exchangeversion import ExchangeVersion
-from .utils.exceptions import CredentialsError, IncorrectParameters, ExchangeVersionError, ObjectType, SearchScopeError, SoapAccessDeniedError, SoapResponseHasError, SoapResponseIsNoneError, DeleteTypeError, UserConfigurationError
+from .utils.exceptions import (CredentialsError, IncorrectParameters, ExchangeVersionError,
+                               ObjectType, SearchScopeError, SoapAccessDeniedError,
+                               SoapResponseHasError, SoapResponseIsNoneError, DeleteTypeError,
+                               UserConfigurationError)

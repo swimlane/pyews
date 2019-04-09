@@ -67,9 +67,8 @@ class ExchangeVersion(object):
 
         if version is '15.0.847.32':
             return 'Exchange2013_SP1'
-        else:
-            ver = version.split('.')
-            return self.API_VERSION_MAP[int(ver[0])][int(ver[1])]
+        ver = version.split('.')
+        return self.API_VERSION_MAP[int(ver[0])][int(ver[1])]
 
     @staticmethod
     def valid_version(version):
@@ -86,5 +85,4 @@ class ExchangeVersion(object):
             return True
         elif version in ExchangeVersion.EXCHANGE_VERSIONS:
             return True
-        else:
-            return False
+        return False

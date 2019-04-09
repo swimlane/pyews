@@ -1,8 +1,10 @@
 import requests
+
 from bs4 import BeautifulSoup
 
 from pyews.utils.exchangeversion import ExchangeVersion
 from pyews.utils.exceptions import IncorrectParameters, ExchangeVersionError, SoapResponseHasError
+
 
 class Autodiscover(object):
     '''A class used to connect to Exchange Web Services using the Autodiscover service endpoint
@@ -41,13 +43,11 @@ class Autodiscover(object):
         IncorrectParameters: An error occurred by not passing the correct parameters into this class
         ExchangeVersionError: An error occurred when passing in an exchange version that is not supported
         SoapResponseHasError: An error occurred when parsing the SOAP response
-
     '''
 
     def __init__(self, credentials, endpoint=None, exchangeVersion=None, create_endpoint_list=False):
-
         self.credentials = credentials
-        
+
         if endpoint:
             self._endpoint = endpoint
             self.endpoint = self._endpoint
@@ -146,7 +146,6 @@ class Autodiscover(object):
             else:
                 raise ExchangeVersionError('You must provide one of the following exchange versions: %s' % ExchangeVersion.EXCHANGE_VERSIONS)
 
-
     def _autodiscover_endpoint_list(self, domain):
         '''A list of autodiscover endpoints to attempt to connect to
         
@@ -179,17 +178,17 @@ class Autodiscover(object):
                 for ver in self.exchangeVersion:
                     autodiscover_result = self._send_autodiscover_payload(self.endpoint, ver)
                     if autodiscover_result:
-                            return autodiscover_result
+                        return autodiscover_result
         else:
             if isinstance(self.endpoint, list):
                 for endpoint in self.endpoint:
                     autodiscover_result = self._send_autodiscover_payload(endpoint, self.exchangeVersion)
                     if autodiscover_result:
-                            return autodiscover_result
+                        return autodiscover_result
             else:
                 autodiscover_result = self._send_autodiscover_payload(self.endpoint, self.exchangeVersion)
                 if autodiscover_result:
-                            return autodiscover_result
+                    return autodiscover_result
 
     def _send_autodiscover_payload(self, url, version):
         '''Used to send and retrieve response from EWS
@@ -198,21 +197,18 @@ class Autodiscover(object):
             url (str): Autodiscover URL for requests
             version (str): Exchange version used in SOAP request body
         '''
-
         soap_request = self._build_autodiscover_soap_request(url, version)
-       # print(soap_request)
         headers = {'content-type': 'text/xml'}
         response = requests.post(
             url,
-            data=soap_request, headers=headers, auth=(self.credentials.email_address, self.credentials.password)
-            )
+            data=soap_request,
+            headers=headers,
+            auth=(self.credentials.email_address, self.credentials.password)
+        )
         parsed_response = BeautifulSoup(response.content, 'xml')
         if parsed_response.find('ErrorCode').string == 'NoError':
             return parsed_response
-        else:
-            raise SoapResponseHasError('The Autodiscover Parsed Response contains an error')
-            return False
-
+        raise SoapResponseHasError('The Autodiscover Parsed Response contains an error')
 
     def _build_autodiscover_soap_request(self, url, version):
         '''Builds XML SOAP request
@@ -255,4 +251,3 @@ class Autodiscover(object):
     </a:GetUserSettingsRequestMessage>
   </soap:Body>
 </soap:Envelope>''' % (version, url, self.credentials.email_address)
-

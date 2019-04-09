@@ -1,7 +1,3 @@
-
-pass
-
-
 import re
 import datetime
 
@@ -16,7 +12,9 @@ SEARCH_QUERY_MAP = {
     'participants': { 'type': str },
     'category': { 'type': str },
     'importance': { 'type': str },
-    'kind': ['contacts','docs','email','externaldata','faxes','im','journals','meetings','microsoftteams','notes','posts','rssfeeds','tasks','voicemail'],
+    'kind': ['contacts','docs','email','externaldata','faxes','im','journals',
+             'meetings', 'microsoftteams','notes','posts','rssfeeds','tasks',
+             'voicemail'],
     'sent': { 'type': datetime.datetime },
     'received': { 'type': datetime.datetime },
     'hasattachment': { 'type': bool },
@@ -24,11 +22,8 @@ SEARCH_QUERY_MAP = {
     'isread': { 'type': bool },
     'size': { 'type': int },
 }
-
-RELATIONAL_OPERATORS = ['<', '>', '=', '..']
-
 OPERATORS = ['AND', 'OR', 'NOT']
-
+RELATIONAL_OPERATORS = ['<', '>', '=', '..']
 
 
 class SearchQuery(object):

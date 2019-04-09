@@ -1,4 +1,5 @@
 import requests
+
 from bs4 import BeautifulSoup
 
 from .serviceendpoint import ServiceEndpoint
@@ -63,13 +64,13 @@ class GetInboxRules (ServiceEndpoint):
         if value.find('ResponseCode').string == 'NoError':
             for item in value.find('Rule'):
                 return_dict = {}
-                if (item.name == 'Conditions'):
+                if item.name == 'Conditions':
                     for child in item.descendants:
                         if (child.name is not None and child.string is not None):
                             return_dict.update({
                                 child.name: child.string
                             })
-                if (item.name == 'Actions'):
+                if item.name == 'Actions':
                     for child in item.descendants:
                         if (child.name is not None and child.string is not None):
                             return_dict.update({
@@ -83,7 +84,6 @@ class GetInboxRules (ServiceEndpoint):
                 return_list.append(return_dict)
             self._response = return_list
 
-
     def soap(self, email_address):
         '''Creates the SOAP XML message body
 
@@ -93,7 +93,7 @@ class GetInboxRules (ServiceEndpoint):
         Returns:
             str: Returns the SOAP XML request body
         '''
-        if (self.userconfiguration.impersonation):
+        if self.userconfiguration.impersonation:
             impersonation_header = self.userconfiguration.impersonation.header
         else:
             impersonation_header = ''

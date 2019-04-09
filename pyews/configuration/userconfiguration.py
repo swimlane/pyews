@@ -1,19 +1,20 @@
 import logging
-from bs4 import BeautifulSoup
 import requests
 
+import pyews.utils.exceptions
+import pyews.service.resolvenames
+
+from bs4 import BeautifulSoup
+
+from pyews.utils.exceptions import ObjectType
+from pyews.utils.exchangeversion import ExchangeVersion
 from pyews.configuration.configuration import Configuration
 from pyews.configuration.credentials import Credentials
 from pyews.configuration.autodiscover import Autodiscover
 from pyews.configuration.impersonation import Impersonation
-import pyews.utils.exceptions
-
-import pyews.service.resolvenames
-from pyews.utils.exceptions import ObjectType
-from pyews.utils.exchangeversion import ExchangeVersion
-
 
 __LOGGER__ = logging.getLogger(__name__)
+
 
 class UserConfiguration(object):
     '''UserConfiguration is the main class of pyews.  It is used by all other ServiceEndpoint parent and child classes.  
@@ -82,17 +83,15 @@ class UserConfiguration(object):
         sid ([type], optional): Defaults to None. Only used when impersonation is set to True.  The SID of the account you want to impersonate
         primarysmtpaddress ([type], optional): Defaults to None. Only used when impersonation is set to True.  The PrimarySmtpAddress of the account you want to impersonate
         smtpaddress ([type], optional): Defaults to None. Only used when impersonation is set to True.  The SmtpAddress of the account you want to impersonate
-    
+
     Raises:
         IncorrectParameters: Provided an incorrect configuration of parameters to this class
     '''
-    
+
     def __init__(self, username, password, exchangeVersion=None, ewsUrl= None, autodiscover=True, impersonation=None):
-        
         __LOGGER__.info('Hello')
-            
         self.credentials = username, password
-        
+
         if exchangeVersion:
             self._exchangeVersion = exchangeVersion
             self.exchangeVersion = self._exchangeVersion
@@ -118,13 +117,13 @@ class UserConfiguration(object):
             self._autodiscover = False
 
         if autodiscover:
-            if exchangeVersion is None:
+            if not exchangeVersion:
                 try:
                     self.raw_soap = Autodiscover(self.credentials, create_endpoint_list=True).response
                     self.properties = self.raw_soap
                 except:
                     __LOGGER__.error('Unable to create configuration from Autodiscover service.')
-            elif exchangeVersion is not None:
+            elif exchangeVersion:
                 try:
                     self.raw_soap = Autodiscover(self.credentials, exchangeVersion=self.exchangeVersion).response
                     self.properties = self.raw_soap
@@ -137,7 +136,6 @@ class UserConfiguration(object):
             else:
                 raise pyews.utils.exceptions.IncorrectParameters('If you are not using Autodiscover then you must provide a ewsUrl and exchangeVersion.')
 
-
     @property
     def configuration(self):
         return Configuration(self)
@@ -145,7 +143,7 @@ class UserConfiguration(object):
     @configuration.setter
     def configuration(self):
         pass
-        
+
     @property
     def impersonation(self):
         return self._impersonation
@@ -208,8 +206,7 @@ class UserConfiguration(object):
         Returns:
              str: The Exchange Version used to connect to EWS
         '''
-        temp = self._exchangeVersion
-        return temp
+        return self._exchangeVersion
 
     @exchangeVersion.setter
     def exchangeVersion(self, value):
@@ -222,7 +219,7 @@ class UserConfiguration(object):
         Raises:
             ExchangeVersionError: An error occured when attempting to verify taht the value passed in was a valid ExchangeVersion
         '''
-        if value is not None:
+        if value:
             if ExchangeVersion.valid_version(value):
                 if value is 'Office365' or 'Exchange2016':
                     self._exchangeVersion = 'Exchange2016'
@@ -280,9 +277,9 @@ class UserConfiguration(object):
             # typical autodiscover response message
             if config.find('ErrorCode').string == 'NoError':
                 for item in config.find_all('UserSetting'):
-                    if (item.Name.string == 'CasVersion'):
+                    if item.Name.string == 'CasVersion':
                         self.exchangeVersion = pyews.utils.exchangeversion.ExchangeVersion(item.Value.string).exchangeVersion
-                    elif (item.Name.string == 'ExternalEwsUrl'):
+                    elif item.Name.string == 'ExternalEwsUrl':
                         self.ewsUrl = item.Value.string
                     else:
                         setting_name = item.Name.string
@@ -294,10 +291,7 @@ class UserConfiguration(object):
                 # typical ResolveNames response message
                 if config.find('ResponseCode').string == 'NoError':
                     temp = config.find('ServerVersionInfo')
-                    ver = "%s.%s" % (
-                        temp['MajorVersion'],
-                        temp['MinorVersion']
-                    )
+                    ver = "%s.%s" % (temp['MajorVersion'], temp['MinorVersion'])
                     self.exchangeVersion = pyews.utils.exchangeversion.ExchangeVersion(ver).exchangeVersion
                     for item in config.find('ResolutionSet'):
                         for i in item.find('Mailbox'):
