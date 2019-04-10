@@ -64,7 +64,7 @@ class DeleteItem(ServiceEndpoint):
             raise DeleteTypeError('You must provide one of the following delete types: %s' % self.DELETE_TYPES)
 
         self._soap_request = self.soap(self.messageId)
-        super(DeleteItem, self).invoke(self._soap_request)
+        self.invoke(self._soap_request)
         self.response = self.raw_soap
 
 

@@ -70,8 +70,8 @@ class SearchMailboxes(ServiceEndpoint):
         else:
             raise SearchScopeError('Please use the default SearchScope of All or specify PrimaryOnly or ArchiveOnly')
 
-        soap_request_body = self.soap(self.mailbox_list)
-        super(SearchMailboxes, self).invoke(soap_request_body)
+        self._soap_request = self.soap(self.mailbox_list)
+        self.invoke(self._soap_request)
         self.response = self.raw_soap
 
     @property

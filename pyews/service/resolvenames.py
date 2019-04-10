@@ -37,7 +37,7 @@ class ResolveNames(ServiceEndpoint):
         super(ResolveNames, self).__init__(userconfiguration)
         
         self._soap_request = self.soap()
-        super(ResolveNames, self).invoke(self._soap_request)
+        self.invoke(self._soap_request)
         self.response = self.raw_soap
 
     @property
