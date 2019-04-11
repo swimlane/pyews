@@ -48,21 +48,14 @@ class Autodiscover(object):
 
     '''
 
-    def __init__(self, credentials, endpoint=None, exchangeVersion=None, create_endpoint_list=False):
+    def __init__(self, credentials, endpoint=None, exchangeVersion=None):
 
         self.credentials = credentials
         
-        if endpoint:
-            self._endpoint = endpoint
-            self.endpoint = self._endpoint
-        else:
-            self._endpoint = None
-
         if exchangeVersion:
-            self._exchangeVersion = exchangeVersion
-            self.exchangeVersion = self._exchangeVersion
+            self.exchangeVersion = exchangeVersion
         else:
-            self._exchangeVersion = None
+            self.exchangeVersion = ExchangeVersion.EXCHANGE_VERSIONS
 
         if endpoint:
             self.endpoint = endpoint
@@ -118,36 +111,22 @@ class Autodiscover(object):
 
     @exchangeVersion.setter
     def exchangeVersion(self, value):
+        return_list = []
         if isinstance(value, list):
-            version_list = []
             for item in value:
                 if ExchangeVersion.valid_version(item):
-                    version_list.append(item)
-            self._exchangeVersion = version_list
-        if value is not None:
+                    if item is 'Office365' or 'Exchange2016':
+                        return_list.append('Exchange2016')
+                    else:
+                        return_list.append(value)
+        else:
             if ExchangeVersion.valid_version(value):
                 if value is 'Office365' or 'Exchange2016':
-                    self._exchangeVersion = 'Exchange2016'
+                    return_list.append('Exchange2016')
                 else:
-                    self._exchangeVersion = value
-            else:
-                raise ExchangeVersionError('You must provide one of the following exchange versions: %s' % ExchangeVersion.EXCHANGE_VERSIONS)
+                    return_list.append(value)
 
-
-    def _autodiscover_endpoint_list(self, domain):
-        '''A list of autodiscover endpoints to attempt to connect to
-        
-        Args:
-            domain (str): The users domain extracted from their email address
-        
-        Returns:
-            list: A list of autodiscover URLs to attempt during autodiscovery
-        '''
-        endpoint_list = []
-        endpoint_list.append('https://outlook.office365.com/autodiscover/autodiscover.svc')
-        endpoint_list.append("https://%s/autodiscover/autodiscover.svc" % domain)
-        endpoint_list.append("https://autodiscover.%s/autodiscover/autodiscover.svc" % domain)
-        return endpoint_list
+        self._exchangeVersion = return_list
 
     def invoke(self):
         '''Used to invoke an Autodiscover SOAP request
@@ -199,7 +178,7 @@ class Autodiscover(object):
             return False
 
 
-    def _build_autodiscover_soap_request(self, url, version):
+    def _soap_request(self, url, version):
         '''Builds XML SOAP request
         
         Args:
