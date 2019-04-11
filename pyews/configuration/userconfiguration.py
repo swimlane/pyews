@@ -94,50 +94,16 @@ class UserConfiguration(object):
     
     def __init__(self, username, password, exchangeVersion=None, ewsUrl= None, autodiscover=True, impersonation=None):
         
-        __LOGGER__.info('Hello')
-            
         self.credentials = username, password
+        self.exchangeVersion = exchangeVersion
+        self.ewsUrl = ewsUrl
+        self.impersonation = impersonation
         
-        if exchangeVersion:
-            self._exchangeVersion = exchangeVersion
-            self.exchangeVersion = self._exchangeVersion
-        else:
-            self._exchangeVersion = None
-
-        if ewsUrl:
-            self._ewsUrl = ewsUrl
-            self.ewsUrl = self._ewsUrl
-        else:
-            self._ewsUrl = None
-
-        if impersonation:
-            self._impersonation = impersonation
-            self.impersonation = self._impersonation
-        else:
-            self._impersonation = None
-
         if autodiscover:
-            self._autodiscover = autodiscover
-            self.autodiscover = self._autodiscover
-        else:
-            self._autodiscover = False
-
-        if autodiscover:
-            if exchangeVersion is None:
-                try:
-                    self.raw_soap = Autodiscover(self.credentials, create_endpoint_list=True).response
-                    self.properties = self.raw_soap
-                except:
-                    __LOGGER__.error('Unable to create configuration from Autodiscover service.')
-            elif exchangeVersion is not None:
-                try:
-                    self.raw_soap = Autodiscover(self.credentials, exchangeVersion=self.exchangeVersion).response
-                    self.properties = self.raw_soap
-                except:
-                    __LOGGER__.error('Unable to create configuration from Autodiscover service.')
+            self.autodiscover = autodiscover
         else:
             if ewsUrl:
-                self.raw_soap = pyews.service.ResolveNames(self).response
+                self.raw_soap = ResolveNames(self).response
                 self.properties = self.raw_soap
             else:
                 raise IncorrectParameters('If you are not using Autodiscover then you must provide a ewsUrl and exchangeVersion.')
@@ -203,6 +169,13 @@ class UserConfiguration(object):
         Args:
             boolean (str): Sets Autodiscover to True or False
         '''
+        if self.exchangeVersion:
+            self.raw_soap = Autodiscover(self.credentials,exchangeVersion=self.exchangeVersion).response
+            self.properties = self.raw_soap
+        else:
+            self.raw_soap = Autodiscover(self.credentials).response
+            self.properties = self.raw_soap
+
         self._autodiscover = bool(boolean)
 
     @property
@@ -212,8 +185,7 @@ class UserConfiguration(object):
         Returns:
              str: The Exchange Version used to connect to EWS
         '''
-        temp = self._exchangeVersion
-        return temp
+        return self._exchangeVersion
 
     @exchangeVersion.setter
     def exchangeVersion(self, value):
@@ -226,7 +198,6 @@ class UserConfiguration(object):
         Raises:
             ExchangeVersionError: An error occured when attempting to verify taht the value passed in was a valid ExchangeVersion
         '''
-        if value is not None:
             if ExchangeVersion.valid_version(value):
                 if value is 'Office365' or 'Exchange2016':
                     self._exchangeVersion = 'Exchange2016'
