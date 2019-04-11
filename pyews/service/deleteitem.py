@@ -94,7 +94,7 @@ class DeleteItem(ServiceEndpoint):
                 })
         else:
             return_list.append({
-                'MessageText': 'Succesfull'
+                'MessageText': 'Successfull'
             })
         self._response = return_list      
 
