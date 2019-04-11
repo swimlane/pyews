@@ -31,16 +31,34 @@ class Credentials(object):
         
         self.email_address = email_address
         self.password = password
-        self.domain = self.get_domain_from_email_address()
+        self.domain = self.email_address
 
+    @property
+    def email_address(self):
+        return self._email_address
 
-    def get_domain_from_email_address(self):
+    @email_address.setter
+    def email_address(self, value):
+        self._email_address = value
+
+    @property
+    def password(self):
+        return self._password
+
+    @password.setter
+    def password(self, value):
+        self._password = value
+
+    @property
+    def domain(self):
+        return self._domain
+
+    @domain.setter
+    def domain(self, value):
         '''Splits the domain from an email address
         
         Returns:
             str: Returns the split domain from an email address
         '''
-
-        local, _, domain = self.email_address.partition('@')
-        return domain
-   
+        local, _, domain = value.partition('@')
+        self._domain = domain
