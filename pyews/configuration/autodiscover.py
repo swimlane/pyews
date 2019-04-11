@@ -3,7 +3,7 @@ from bs4 import BeautifulSoup
 
 from pyews.configuration.endpoint import Endpoint
 from pyews.utils.exchangeversion import ExchangeVersion
-from pyews.utils.exceptions import IncorrectParameters, ExchangeVersionError, SoapResponseHasError
+from pyews.utils.exceptions import IncorrectParameters, ExchangeVersionError, SoapResponseHasError, SoapConnectionRefused, SoapConnectionError
 
 class Autodiscover(object):
     '''A class used to connect to Exchange Web Services using the Autodiscover service endpoint
@@ -190,6 +190,8 @@ class Autodiscover(object):
             url,
             data=soap_request, headers=headers, auth=(self.credentials.email_address, self.credentials.password)
             )
+            raise SoapConnectionError('Error sending autodiscover payload to {ep}'.format(ep=endpoint))
+
         parsed_response = BeautifulSoup(response.content, 'xml')
         if parsed_response.find('ErrorCode').string == 'NoError':
             return parsed_response

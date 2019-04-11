@@ -2,6 +2,14 @@ class IncorrectParameters(Exception):
     '''Raised when the incorrect configuration of parameters is passed into a Class'''
     pass
 
+class SoapConnectionRefused(Exception):
+    '''Raised when a connection is refused from the server'''
+    pass
+
+class SoapConnectionError(Exception):
+    '''Raised when an error occurs attempting to connect to Exchange Web Services endpoint'''
+    pass
+
 class SoapResponseIsNoneError(Exception):
     '''Raised when a SOAP request response is None'''
     pass

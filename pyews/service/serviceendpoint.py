@@ -79,10 +79,11 @@ class ServiceEndpoint(object):
             headers=self.SOAP_REQUEST_HEADER, 
             auth=(self.userconfiguration.credentials.email_address, self.userconfiguration.credentials.password)
         )
-        parsed_response = BeautifulSoup(r.content, 'xml')
+            raise SoapConnectionError('Error sending SOAP XML payload to {ep}'.format(ep=self.userconfiguration.ewsUrl))
+
         if parsed_response.find('ResponseCode').string == 'NoError':
             self.raw_soap = parsed_response
         elif parsed_response.find('ResponseCode').string == 'ErrorAccessDenied':
             raise SoapAccessDeniedError('%s' % parsed_response.find('MessageText').string)
-        else:
-            raise SoapResponseHasError('Unable to parse response from DeleteItem')
+
+        raise SoapResponseHasError('Unable to parse response from {current}' % self.__class__.__name__)

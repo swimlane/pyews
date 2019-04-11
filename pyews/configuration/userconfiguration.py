@@ -8,8 +8,7 @@ from pyews.configuration.autodiscover import Autodiscover
 from pyews.configuration.impersonation import Impersonation
 import pyews.utils.exceptions
 
-import pyews.service.resolvenames
-from pyews.utils.exceptions import ObjectType
+from pyews.utils.exceptions import ObjectType, IncorrectParameters, ExchangeVersionError, UserConfigurationError
 from pyews.utils.exchangeversion import ExchangeVersion
 
 
@@ -135,7 +134,7 @@ class UserConfiguration(object):
                 self.raw_soap = pyews.service.ResolveNames(self).response
                 self.properties = self.raw_soap
             else:
-                raise pyews.utils.exceptions.IncorrectParameters('If you are not using Autodiscover then you must provide a ewsUrl and exchangeVersion.')
+                raise IncorrectParameters('If you are not using Autodiscover then you must provide a ewsUrl and exchangeVersion.')
 
 
     @property
@@ -156,7 +155,6 @@ class UserConfiguration(object):
             self._impersonation = value
         else:
             self._impersonation = None
-            raise ObjectType('Please provide a Impersonation object')
 
     @property
     def credentials(self):
@@ -229,7 +227,7 @@ class UserConfiguration(object):
                 else:
                     self._exchangeVersion = value
             else:
-                raise pyews.utils.exceptions.ExchangeVersionError('You must provide one of the following exchange versions: %s' % pyews.utils.exchangeversion.ExchangeVersion.EXCHANGE_VERSIONS)
+            self._exchangeVersion = None
 
     @property
     def ewsUrl(self):
