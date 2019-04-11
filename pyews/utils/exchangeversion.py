@@ -55,6 +55,7 @@ class ExchangeVersion(object):
 
         self.exchangeVersion = self._get_api_version(version)
 
+
     def _get_api_version(self, version):
         '''Gets a string representation of an Exchange Version number
         
@@ -86,5 +87,7 @@ class ExchangeVersion(object):
             return True
         elif version in ExchangeVersion.EXCHANGE_VERSIONS:
             return True
-        else:
-            return False
+            
+        return False
+
+    
