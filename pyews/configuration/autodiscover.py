@@ -1,4 +1,7 @@
-import requests
+import requests, logging
+from requests.adapters import HTTPAdapter
+from requests.packages.urllib3.util.retry import Retry
+
 from bs4 import BeautifulSoup
 
 from pyews.configuration.endpoint import Endpoint
@@ -59,7 +62,7 @@ class Autodiscover(object):
 
         if endpoint:
             self.endpoint = endpoint
-                else:
+        else:
             self.endpoint = Endpoint(self.exchangeVersion, domain=self.credentials.domain).endpoint
 
         _response = self.invoke()
@@ -79,7 +82,7 @@ class Autodiscover(object):
 
     @endpoint.setter
     def endpoint(self, value):
-            endpoint_list = []
+        endpoint_list = []
         if isinstance(value, list):
             for item in value:
                 endpoint_list.append(item)
@@ -134,11 +137,13 @@ class Autodiscover(object):
         Returns:
             str: Returns response from SOAP request
         '''
-        if isinstance(self.exchangeVersion, list):
-            if isinstance(self.endpoint, list):
-                for ver in self.exchangeVersion:
-                    for endpoint in self.endpoint:
+        soap_list = []
+        for ver in self.exchangeVersion:
+            for endpoint in self.endpoint:
                 __LOGGER__.info("Determining if {ep} is a valid endpoint".format(ep=endpoint))
+                try:
+                    requests.get(endpoint)
+                except requests.exceptions.RequestException as e:
                     __LOGGER__.warning(
                         "An {err} occurred attempting to connect to {ep} during autodiscover".format(
                             err=e.__class__.__name__,
@@ -147,20 +152,49 @@ class Autodiscover(object):
                         exc_info=True
                     )
                     continue
-                if autodiscover_result:
-                            return autodiscover_result
 
-    def _send_autodiscover_payload(self, url, version):
+                soap_request = self._soap_request(endpoint, ver)
+                autodiscover_result = self._send_autodiscover_payload(endpoint, soap_request)
+                if autodiscover_result:
+                    return autodiscover_result
+                    
+
+    def requests_retry_session(
+        self,
+        retries=20,
+        backoff_factor=0.3,
+        status_forcelist=(404, 500, 502, 504),
+        session=None,
+    ):
+        session = session or requests.Session()
+        retry = Retry(
+            total=retries,
+            read=retries,
+            connect=retries,
+            backoff_factor=backoff_factor,
+            status_forcelist=status_forcelist,
+        )
+        adapter = HTTPAdapter(max_retries=retry)
+        session.mount('http://', adapter)
+        session.mount('https://', adapter)
+        return session
+
+    def _send_autodiscover_payload(self, endpoint, soap_body):
         '''Used to send and retrieve response from EWS
         
         Args:
             url (str): Autodiscover URL for requests
             version (str): Exchange version used in SOAP request body
         '''
-
-        soap_request = self._build_autodiscover_soap_request(url, version)
-       # print(soap_request)
         headers = {'content-type': 'text/xml'}
+        try:
+            response = self.requests_retry_session().post(
+                endpoint,
+                data=soap_body,
+                headers=headers, 
+                auth=(self.credentials.email_address, self.credentials.password)
+            )
+        except requests.exceptions.RequestException as e:
             __LOGGER__.warning(
                 "An {err} occurred connecting to autodiscover endpoint: {ep}".format(
                     err=e.__class__.__name__,
@@ -173,9 +207,8 @@ class Autodiscover(object):
         parsed_response = BeautifulSoup(response.content, 'xml')
         if parsed_response.find('ErrorCode').string == 'NoError':
             return parsed_response
-        else:
-            raise SoapResponseHasError('The Autodiscover Parsed Response contains an error')
-            return False
+        
+        raise SoapResponseHasError('The Autodiscover Parsed Response contains an error')
 
 
     def _soap_request(self, url, version):
