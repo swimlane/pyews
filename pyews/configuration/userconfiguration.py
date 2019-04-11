@@ -277,6 +277,10 @@ class UserConfiguration(object):
             # Trying to determine if this is a response from a 
             # typical autodiscover response message
             if config.find('ErrorCode').string == 'NoError':
+            __LOGGER__.warning("An error occurred attempting to parse SOAP response from Exchange Web Services.  Unable to create UserConfiguration properties.", exc_info=True)
+         
+
+    def _parse_autodiscover_properties(self, config):
                 for item in config.find_all('UserSetting'):
                     if (item.Name.string == 'CasVersion'):
                         self.exchangeVersion = pyews.utils.exchangeversion.ExchangeVersion(item.Value.string).exchangeVersion

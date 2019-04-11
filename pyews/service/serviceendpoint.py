@@ -1,7 +1,10 @@
 from bs4 import BeautifulSoup
-import requests, re
+import requests, re, logging
 
 from pyews.utils.exceptions import SoapResponseHasError, SoapAccessDeniedError
+
+__LOGGER__ = logging.getLogger(__name__)
+
 
 class ServiceEndpoint(object):
     
@@ -79,6 +82,13 @@ class ServiceEndpoint(object):
             headers=self.SOAP_REQUEST_HEADER, 
             auth=(self.userconfiguration.credentials.email_address, self.userconfiguration.credentials.password)
         )
+            __LOGGER__.warning(
+                "An {err} occurred connecting to Exchange Web Services: {ep}".format(
+                    err=e.__class__.__name__,
+                    ep=self.userconfiguration.ewsUrl
+                ),
+                exc_info=True
+            )
             raise SoapConnectionError('Error sending SOAP XML payload to {ep}'.format(ep=self.userconfiguration.ewsUrl))
 
         if parsed_response.find('ResponseCode').string == 'NoError':

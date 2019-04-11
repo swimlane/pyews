@@ -5,6 +5,9 @@ from pyews.configuration.endpoint import Endpoint
 from pyews.utils.exchangeversion import ExchangeVersion
 from pyews.utils.exceptions import IncorrectParameters, ExchangeVersionError, SoapResponseHasError, SoapConnectionRefused, SoapConnectionError
 
+__LOGGER__ = logging.getLogger(__name__)
+
+
 class Autodiscover(object):
     '''A class used to connect to Exchange Web Services using the Autodiscover service endpoint
     
@@ -156,22 +159,15 @@ class Autodiscover(object):
             if isinstance(self.endpoint, list):
                 for ver in self.exchangeVersion:
                     for endpoint in self.endpoint:
-                        autodiscover_result = self._send_autodiscover_payload(endpoint, ver)
-                        if autodiscover_result:
-                            return autodiscover_result
-            else:
-                for ver in self.exchangeVersion:
-                    autodiscover_result = self._send_autodiscover_payload(self.endpoint, ver)
-                    if autodiscover_result:
-                            return autodiscover_result
-        else:
-            if isinstance(self.endpoint, list):
-                for endpoint in self.endpoint:
-                    autodiscover_result = self._send_autodiscover_payload(endpoint, self.exchangeVersion)
-                    if autodiscover_result:
-                            return autodiscover_result
-            else:
-                autodiscover_result = self._send_autodiscover_payload(self.endpoint, self.exchangeVersion)
+                __LOGGER__.info("Determining if {ep} is a valid endpoint".format(ep=endpoint))
+                    __LOGGER__.warning(
+                        "An {err} occurred attempting to connect to {ep} during autodiscover".format(
+                            err=e.__class__.__name__,
+                            ep=endpoint
+                        ),
+                        exc_info=True
+                    )
+                    continue
                 if autodiscover_result:
                             return autodiscover_result
 
@@ -186,9 +182,12 @@ class Autodiscover(object):
         soap_request = self._build_autodiscover_soap_request(url, version)
        # print(soap_request)
         headers = {'content-type': 'text/xml'}
-        response = requests.post(
-            url,
-            data=soap_request, headers=headers, auth=(self.credentials.email_address, self.credentials.password)
+            __LOGGER__.warning(
+                "An {err} occurred connecting to autodiscover endpoint: {ep}".format(
+                    err=e.__class__.__name__,
+                    ep=endpoint
+                ),
+                exc_info=True
             )
             raise SoapConnectionError('Error sending autodiscover payload to {ep}'.format(ep=endpoint))
 
