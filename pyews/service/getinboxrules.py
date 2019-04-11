@@ -40,7 +40,7 @@ class GetInboxRules (ServiceEndpoint):
         super(GetInboxRules, self).__init__(userconfiguration)
 
         self._soap_request = self.soap(self.email_address)
-        super(GetInboxRules, self).invoke(self._soap_request)
+        self.invoke(self._soap_request)
         self.response = self.raw_soap
 
     @property
