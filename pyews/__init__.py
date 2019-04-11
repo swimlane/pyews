@@ -3,6 +3,7 @@ setup_logging()
 
 
 from .configuration.userconfiguration import UserConfiguration
+from .configuration.endpoint import Endpoint
 from .configuration.autodiscover import Autodiscover
 from .configuration.credentials import Credentials
 from .service.serviceendpoint import ServiceEndpoint

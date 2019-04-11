@@ -1,6 +1,7 @@
 import requests
 from bs4 import BeautifulSoup
 
+from pyews.configuration.endpoint import Endpoint
 from pyews.utils.exchangeversion import ExchangeVersion
 from pyews.utils.exceptions import IncorrectParameters, ExchangeVersionError, SoapResponseHasError
 
@@ -60,27 +61,10 @@ class Autodiscover(object):
         else:
             self._exchangeVersion = None
 
-        if exchangeVersion is not None and create_endpoint_list is False:
-            if ExchangeVersion.valid_version(exchangeVersion):
-                if exchangeVersion is 'Office365' or 'Exchange2016':
-                    self.exchangeVersion = 'Exchange2016'
-                    self.endpoint = 'https://outlook.office365.com/autodiscover/autodiscover.svc'
+        if endpoint:
+            self.endpoint = endpoint
                 else:
-                    self.exchangeVersion = exchangeVersion
-                    self.endpoint = self._autodiscover_endpoint_list(self.credentials.domain)
-        elif exchangeVersion is not None and create_endpoint_list is True:
-            if ExchangeVersion.valid_version(exchangeVersion):
-                if exchangeVersion is 'Office365' or 'Exchange2016':
-                    self.exchangeVersion = 'Exchange2016'
-                else:
-                    self.exchangeVersion = exchangeVersion
-                    self.endpoint = self._autodiscover_endpoint_list(self.credentials.domain)
-        elif exchangeVersion is None and create_endpoint_list is False:
-            raise IncorrectParameters('You must either provide an exchange_version or direct this class to create a URL list for you')
-        elif exchangeVersion is None and create_endpoint_list is True:
-            temp = self._autodiscover_endpoint_list(self.credentials.domain)
-            self.endpoint = self._autodiscover_endpoint_list(self.credentials.domain)
-            self._exchangeVersion = ExchangeVersion.EXCHANGE_VERSIONS
+            self.endpoint = Endpoint(self.exchangeVersion, domain=self.credentials.domain).endpoint
 
         _response = self.invoke()
         if _response:
@@ -99,13 +83,13 @@ class Autodiscover(object):
 
     @endpoint.setter
     def endpoint(self, value):
-        if isinstance(value, list):
             endpoint_list = []
+        if isinstance(value, list):
             for item in value:
                 endpoint_list.append(item)
-            self._endpoint = endpoint_list
         else:
-            self._endpoint = value
+            endpoint_list.append(value)
+        self._endpoint = endpoint_list
 
     @property
     def response(self):
