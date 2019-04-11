@@ -49,7 +49,7 @@ class GetSearchableMailboxes(ServiceEndpoint):
         super(GetSearchableMailboxes, self).__init__(userconfiguration)
 
         self._soap_request = self.soap()
-        self.invoke(_soap_request)
+        self.invoke(self._soap_request)
         self.response = self.raw_soap
 
     @property
