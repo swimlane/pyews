@@ -6,19 +6,12 @@ from .credentials import Credentials
 from .autodiscover import Autodiscover
 from .impersonation import Impersonation
 
-#from pyews.configuration.configuration import Configuration
-#from pyews.configuration.credentials import Credentials
-#from pyews.configuration.autodiscover import Autodiscover
-#from pyews.configuration.impersonation import Impersonation
-#import pyews.utils.exceptions
-
 from pyews.service.resolvenames import ResolveNames
-#import pyews.service.resolvenames
 from pyews.utils.exceptions import ObjectType, IncorrectParameters, ExchangeVersionError, UserConfigurationError
 from pyews.utils.exchangeversion import ExchangeVersion
 
-
 __LOGGER__ = logging.getLogger(__name__)
+
 
 class UserConfiguration(object):
     '''UserConfiguration is the main class of pyews.  It is used by all other ServiceEndpoint parent and child classes.  
@@ -93,12 +86,12 @@ class UserConfiguration(object):
     '''
     
     def __init__(self, username, password, exchangeVersion=None, ewsUrl= None, autodiscover=True, impersonation=None):
-        
+            
         self.credentials = username, password
         self.exchangeVersion = exchangeVersion
         self.ewsUrl = ewsUrl
         self.impersonation = impersonation
-        
+
         if autodiscover:
             self.autodiscover = autodiscover
         else:
@@ -198,12 +191,12 @@ class UserConfiguration(object):
         Raises:
             ExchangeVersionError: An error occured when attempting to verify taht the value passed in was a valid ExchangeVersion
         '''
-            if ExchangeVersion.valid_version(value):
-                if value is 'Office365' or 'Exchange2016':
-                    self._exchangeVersion = 'Exchange2016'
-                else:
-                    self._exchangeVersion = value
+        if ExchangeVersion.valid_version(value):
+            if value is 'Office365' or 'Exchange2016':
+                self._exchangeVersion = 'Exchange2016'
             else:
+                self._exchangeVersion = value
+        else:
             self._exchangeVersion = None
 
     @property
@@ -251,41 +244,43 @@ class UserConfiguration(object):
             UserConfigurationError: An error occured when create the configuration object.  This is a critical error in pyews.
         '''
         try:
-            # Trying to determine if this is a response from a 
-            # typical autodiscover response message
-            if config.find('ErrorCode').string == 'NoError':
+            if config.find('ErrorCode'):
+                if config.find('ErrorCode').string == 'NoError':
+                    if config.find('GetUserSettingsResponseMessage'):
+                        self._parse_autodiscover_properties(config)
+            if config.find('ResponseCode'):
+                if config.find('ResponseCode').string == 'NoError':
+                    if config.find('ResolveNamesResponse'):
+                        self._parse_resolvenames_properties(config)
+        except:
             __LOGGER__.warning("An error occurred attempting to parse SOAP response from Exchange Web Services.  Unable to create UserConfiguration properties.", exc_info=True)
          
 
     def _parse_autodiscover_properties(self, config):
-                for item in config.find_all('UserSetting'):
-                    if (item.Name.string == 'CasVersion'):
-                        self.exchangeVersion = pyews.utils.exchangeversion.ExchangeVersion(item.Value.string).exchangeVersion
-                    elif (item.Name.string == 'ExternalEwsUrl'):
-                        self.ewsUrl = item.Value.string
-                    else:
-                        setting_name = item.Name.string
-                        setting_value = item.Value.string
-                        setattr(self, setting_name, setting_value)
-        except:
-            try:
-                # Trying to determine if this is a response from a
-                # typical ResolveNames response message
-                if config.find('ResponseCode').string == 'NoError':
-                    temp = config.find('ServerVersionInfo')
-                    ver = "%s.%s" % (
-                        temp['MajorVersion'],
-                        temp['MinorVersion']
-                    )
-                    self.exchangeVersion = pyews.utils.exchangeversion.ExchangeVersion(ver).exchangeVersion
-                    for item in config.find('ResolutionSet'):
-                        for i in item.find('Mailbox'):
-                            setattr(self, i.name, i.string)
-                    for item in config.find('ResolutionSet'):
-                        for i in item.find('Contact'):
-                            setattr(self, i.name, i.string)
-            except:
-                raise pyews.utils.exceptions.UserConfigurationError('Unable to process response message.')
+        for item in config.find_all('UserSetting'):
+            if (item.Name.string == 'CasVersion'):
+                self.exchangeVersion = ExchangeVersion(item.Value.string).exchangeVersion
+            elif (item.Name.string == 'ExternalEwsUrl'):
+                self.ewsUrl = item.Value.string
+            else:
+                setattr(self, item.Name.string, item.Value.string)
+
+    def _parse_resolvenames_properties(self, config):
+        temp = config.find('ServerVersionInfo')
+        ver = "%s.%s" % (
+            temp['MajorVersion'],
+            temp['MinorVersion']
+        )
+        self.exchangeVersion = ExchangeVersion(ver).exchangeVersion
+        for item in config.find('ResolutionSet'):
+            for i in item.find('Mailbox'):
+                setattr(self, i.name, i.string)
+            for i in item.find('Contact').descendants:
+                if i.name == 'Entry' and i.string:
+                    setattr(self, i['Key'], i.string)
+                else:
+                    if i.name and i.string:
+                        setattr(self, i.name, i.string)
 
     @property
     def raw_soap(self):
