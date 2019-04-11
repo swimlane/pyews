@@ -24,16 +24,16 @@ class Impersonation(object):
 
     def __init__(self, principalname=None, sid=None, primarysmtpaddress=None, smtpaddress=None):
 
-        if principalname is not None:
+        if principalname:
             self.impersonation_type = 'PrincipalName'
             self.impersonation_value = principalname
-        elif sid is not None:
+        elif sid:
             self.impersonation_type = 'SID'
             self.impersonation_value = sid
-        elif primarysmtpaddress is not None:
+        elif primarysmtpaddress:
             self.impersonation_type = 'PrimarySmtpAddress'
             self.impersonation_value = primarysmtpaddress
-        elif smtpaddress is not None:
+        elif smtpaddress:
             self.impersonation_type = 'SmtpAddress'
             self.impersonation_value = smtpaddress
         else:
