@@ -189,7 +189,7 @@ class UserConfiguration(object):
             value (str): A string value that represents the ExchangeVersion wanting to be used
         
         Raises:
-            ExchangeVersionError: An error occured when attempting to verify taht the value passed in was a valid ExchangeVersion
+            ExchangeVersionError: An error occurred when attempting to verify that the value passed in was a valid ExchangeVersion
         '''
         if ExchangeVersion.valid_version(value):
             if value is 'Office365' or 'Exchange2016':

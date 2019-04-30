@@ -21,7 +21,7 @@ class ExchangeVersion(object):
                print(versions)
 
                # output
-               ['Exchange2016', 'Exchange2013_SP1', 'Exchange2013', 'Exchange2010_SP2', 'Exchange2010_SP1', 'Exchange2010']
+               ['Exchange2019', 'Exchange2016', 'Exchange2013_SP1', 'Exchange2013', 'Exchange2010_SP2', 'Exchange2010_SP1', 'Exchange2010']
                 
         Args:
             version (str): An Exchange Version number.  Example: 15.20.5 = Exchange2016
@@ -45,11 +45,12 @@ class ExchangeVersion(object):
         15: {
             0: 'Exchange2013',  # Minor builds starting from 847 are Exchange2013_SP1, see api_version()
             1: 'Exchange2016',
+            2: 'Exchange2019',
             20: 'Exchange2016',  # This is Office365. See issue #221
         }
     }
 
-    EXCHANGE_VERSIONS = ['Exchange2016', 'Exchange2013_SP1', 'Exchange2013', 'Exchange2010_SP2', 'Exchange2010_SP1', 'Exchange2010']
+    EXCHANGE_VERSIONS = ['Exchange2019', 'Exchange2016', 'Exchange2013_SP1', 'Exchange2013', 'Exchange2010_SP2', 'Exchange2010_SP1', 'Exchange2010']
 
     def __init__(self, version):
 

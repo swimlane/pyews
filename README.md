@@ -1,5 +1,8 @@
 # py-ews
 
+[![Documentation Status](https://readthedocs.org/projects/py-ews/badge/?version=latest)](https://py-ews.readthedocs.io/en/latest/?badge=latest)
+
+
 ```
 .______   ____    ____       ___________    __    ____   _______.
 |   _  \  \   \  /   /      |   ____\   \  /  \  /   /  /       |
@@ -10,7 +13,7 @@
 ```                                                       
 A Python package to interact with Exchange Web Services
 
-**py-ews** is a cross platform python package to interact with both Exchange 2010 to 2016 on-premises and Exchange Online (Office 365).  This package will wrap all Exchange Web Service endpoints, but currently is focused on providing eDiscovery endpoints. 
+**py-ews** is a cross platform python package to interact with both Exchange 2010 to 2019 on-premises and Exchange Online (Office 365).  This package will wrap all Exchange Web Service endpoints, but currently is focused on providing eDiscovery endpoints. 
 
 
 

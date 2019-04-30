@@ -14,7 +14,7 @@ __LOGGER__ = logging.getLogger(__name__)
 class Autodiscover(object):
     '''A class used to connect to Exchange Web Services using the Autodiscover service endpoint
     
-    The Autodiscover class can be used with both Office 365 and on-premises Exchange 2010 to 2016.
+    The Autodiscover class can be used with both Office 365 and on-premises Exchange 2010 to 2019.
     Currently, it has been thoroughly tested with Office 365 but not so much with the on-premises versions of Exchange.
     
     Example:
