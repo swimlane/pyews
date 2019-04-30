@@ -1,49 +1,68 @@
-# pyews
-> A Python package to interact with Exchange Web Services
+# py-ews
 
-[![NPM Version][npm-image]][npm-url]
-[![Build Status][travis-image]][travis-url]
-[![Downloads Stats][npm-downloads]][npm-url]
+```
+.______   ____    ____       ___________    __    ____   _______.
+|   _  \  \   \  /   /      |   ____\   \  /  \  /   /  /       |
+|  |_)  |  \   \/   / ______|  |__   \   \/    \/   /  |   (----`
+|   ___/    \_    _/ |______|   __|   \            /    \   \    
+|  |          |  |          |  |____   \    /\    / .----)   |   
+| _|          |__|          |_______|   \__/  \__/  |_______/    
+```                                                       
+A Python package to interact with Exchange Web Services
 
-`pyews` is a python package to interact with both Exchange 2010 to 2016 on-premises and Exchange Online (Office 365).  This package will wrap all Exchange Web Service endpoints, but currently is focused on providing eDiscovery endpoints. 
+**py-ews** is a cross platform python package to interact with both Exchange 2010 to 2016 on-premises and Exchange Online (Office 365).  This package will wrap all Exchange Web Service endpoints, but currently is focused on providing eDiscovery endpoints. 
 
-Currently this package supports the following endpoints:
+
+
+**py-ews** has the following notable features in it's current release:
+
+* Autodiscover support
+* Delegation support
+* Impersonation support
+* Retrieve all mailboxes that can be searched based on credentials provided
+* Search a list of (or single) mailboxes in your Exchange environment using all supported search attributes
+* Delete email items from mailboxes in your Exchange environment
+* Retrieve mailbox inbox rules for a specific account
+
+Currently this package supports the following ServiceEndpoints:
 
 * Autodiscover
-* GetSearchableMailboxes
-* SearchMailboxes
 * DeleteItem
 * GetInboxRules
+* GetSearchableMailboxes
 * ResolveNames
+* SearchMailboxes
+
 
 ## Installation
 
 OS X & Linux:
 
 ```sh
-pip install pyews
+pip install py-ews
 ```
 
 Windows:
 
 ```sh
-pip install pyews
+pip install py-ews
 ```
 
 ## Usage example
 
-The first step in using pyews is that you need to create a userconfiguration object.  Think of this as all the connection information for Exchange Web Services.  An example of creating a userconfiguration using Office 365 Autodiscover is:
+The first step in using **py-ews** is that you need to create a `UserConfiguration` object.  Think of this as all the connection information for Exchange Web Services.  An example of creating a `UserConfiguration object` using Office 365 `Autodiscover` is:
 
 ```python
 from pyews import UserConfiguration
 
 userconfig = UserConfiguration(
-   'myaccount@company.com',
-   'Password1234'
+      'myaccount@company.com',
+      'Password1234'
 )
 ```
 
-If you would like to use an alternative autodiscover endpoint (or any alternative endpoint) then please provide one using the `endpoint` named paramter:
+
+If you would like to use an alternative `Autodiscover` endpoint (or any alternative endpoint) then please provide one using the `endpoint` named parameter:
 
 ```python
 from pyews import UserConfiguration
@@ -55,37 +74,43 @@ userconfig = UserConfiguration(
 )
 ```
 
-For more information about creating a `UserConfiguration` object, please see the full documentation here:
+For more information about creating a `UserConfiguration` object, please see the full documentation on our ReadTheDocs page.
 
-Now that you have a `UserConfiguration` object, we can now use a Service Endpoint.  This example will demonstrate how to `GetSearchableMailboxes` then by using the `SearchMailboxes` we will search all those mailboxes.  The returned results will then be deleted (moved to Deleted Items folder) from Exchange.
+Now that you have a `UserConfiguration` object, we can now use a `ServiceEndpoint`.  This example will demonstrate how you can identify which mailboxes you have access to by using the `GetSearchableMailboxes` EWS endpoint.
+
+Once you have identified a list of mailbox reference ids, then you can begin searching all of those mailboxes by using the `SearchMailboxes` EWS endpoint.
+
+The returned results will then be deleted (moved to Deleted Items folder) from Exchange using the `DeleteItem` EWS endpoint.
 
 ```python
+
 from pyews import UserConfiguration
 
 userconfig = UserConfiguration(
-   'myaccount@company.com',
-   'Password1234'
+      'myaccount@company.com',
+      'Password1234'
 )
 
 # get searchable mailboxes based on your accounts permissions
 referenceid_list = []
 for mailbox in GetSearchableMailboxes(userconfig).response:
-    referenceid_list.append(mailbox['ReferenceId'])
+      referenceid_list.append(mailbox['ReferenceId'])
 
 # let's search all the referenceid_list items
 messages_found = []
 for search in SearchMailboxes('subject:account', userconfig, referenceid_list).response:
-    messages_found.append(search['MessageId'])
-    # we can print the results first if we want
-    print(search['Subject'])
-    print(search['MessageId'])
-    print(search['Sender'])
-    print(search['ToRecipients'])
-    print(search['CreatedTime'])
-    print(search['ReceivedTime'])
-    #etc.
+      messages_found.append(search['MessageId'])
+      # we can print the results first if we want
+      print(search['Subject'])
+      print(search['MessageId'])
+      print(search['Sender'])
+      print(search['ToRecipients'])
+      print(search['CreatedTime'])
+      print(search['ReceivedTime'])
+      #etc.
 
-# if we wanted to now delete a specific message then we would call the DeleteItem class like this but we can also pass in the entire messages_found list
+# if we wanted to now delete a specific message then we would call the DeleteItem 
+# class like this but we can also pass in the entire messages_found list
 deleted_message_response = DeleteItem(messages_found[2], userconfig).response
 
 print(deleted_message_response)
@@ -103,11 +128,11 @@ Research
 Upgrade Your Account!
 AAMkADAyNTZhNmMyLWNmZTctNDIyZC0..............
 Josh Rickard
-Josh Rickard
+Josh Rickard 
 2019-01-24T18:41:11Z
 2019-01-24T18:41:11Z
 New or modified user account information
-AAMkAGZjOTlkOWExLTM2MDEtNGI3MS04..............
+AAMkAGZjOTlkOWExLTM2MDEtNGI3MS04.............. 
 Microsoft Online Services Team
 Research
 2019-01-24T18:38:06Z
@@ -131,12 +156,12 @@ To run the container, use the following:
 docker run pyews
 ```
 
-I am new to Unit Testing, but I am working on that as time permits.  If you would like to help, I wouldn't be sad about it. :)
-
 ## Release History
 
-* 0.0.1
-    * Initial release of pyews and it is still considered a work in progress
+* 1.0.0
+   * Initial release of py-ews to PyPi
+* 1.0.1
+   * Updating Documentation with new reference links
 
 ## Meta
 
@@ -146,17 +171,8 @@ Distributed under the MIT license. See ``LICENSE`` for more information.
 
 ## Contributing
 
-1. Fork it (<https://github.com/msadministrator/pyews/fork>)
+1. Fork it (<https://github.com/swimlane/pyews/fork>)
 2. Create your feature branch (`git checkout -b feature/fooBar`)
 3. Commit your changes (`git commit -am 'Add some fooBar'`)
 4. Push to the branch (`git push origin feature/fooBar`)
 5. Create a new Pull Request
-
-<!-- Markdown link & img dfn's 
-[npm-image]: https://img.shields.io/npm/v/datadog-metrics.svg?style=flat-square
-[npm-url]: https://npmjs.org/package/datadog-metrics
-[npm-downloads]: https://img.shields.io/npm/dm/datadog-metrics.svg?style=flat-square
-[travis-image]: https://img.shields.io/travis/dbader/node-datadog-metrics/master.svg?style=flat-square
-[travis-url]: https://travis-ci.org/dbader/node-datadog-metrics
--->
-[wiki]: https://github.com/yourname/yourproject/wiki

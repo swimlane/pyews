@@ -23,18 +23,18 @@ sys.path.insert(0, os.path.abspath('..'))
 # -- Project information -----------------------------------------------------
 import pyews
 
-from pyews.configuration import (autodiscover, userconfiguration, configuration, credentials, impersonation, userconfiguration)
-from pyews.service import (deleteitem, getinboxrules, getsearchablemailboxes, resolvenames, searchmailboxes, searchquery, serviceendpoint)
-from pyews.utils import (exceptions, exchangeversion, logger)
+#from pyews.configuration import (autodiscover, userconfiguration, configuration, credentials, impersonation, userconfiguration)
+#from pyews.service import (deleteitem, getinboxrules, getsearchablemailboxes, resolvenames, searchmailboxes, searchquery, serviceendpoint)
+#from pyews.utils import (exceptions, exchangeversion, logger)
 
-project = 'pyews'
-copyright = '2019, Josh Rickard (@MSAdministrator)'
-author = 'Josh Rickard (@MSAdministrator)'
+project = 'py-ews'
+copyright = '2019, Swimlane'
+author = 'Swimlane'
 
 # The short X.Y version
-version = '0.0.1'
+version = '1.0.1'
 # The full version, including alpha/beta/rc tags
-release = '0.0.1'
+release = '1.0.1'
 
 
 # -- General configuration ---------------------------------------------------

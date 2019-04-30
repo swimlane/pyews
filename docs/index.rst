@@ -1,28 +1,28 @@
-Welcome to pyews's documentation!
+Welcome to py-ews's documentation!
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 ::
 
-    .______   ____    ____  ___________    __    ____   _______.
-    |   _  \  \   \  /   / |   ____\   \  /  \  /   /  /       |
-    |  |_)  |  \   \/   /  |  |__   \   \/    \/   /  |   (----`
-    |   ___/    \_    _/   |   __|   \            /    \   \    
-    |  |          |  |     |  |____   \    /\    / .----)   |   
-    | _|          |__|     |_______|   \__/  \__/  |_______/    
-                                                                
+    .______   ____    ____       ___________    __    ____   _______.
+    |   _  \  \   \  /   /      |   ____\   \  /  \  /   /  /       |
+    |  |_)  |  \   \/   / ______|  |__   \   \/    \/   /  |   (----`
+    |   ___/    \_    _/ |______|   __|   \            /    \   \    
+    |  |          |  |          |  |____   \    /\    / .----)   |   
+    | _|          |__|          |_______|   \__/  \__/  |_______/    
+                                                                 
 
 
     A Python package to interact with Exchange Web Services
 
 
 
-**pyews** is a cross platform python package to interact with both Exchange 2010 to 2016 on-premises and Exchange Online (Office 365).  This package will wrap all Exchange Web Service endpoints, but currently is focused on providing eDiscovery endpoints. 
+**py-ews** is a cross platform python package to interact with both Exchange 2010 to 2016 on-premises and Exchange Online (Office 365).  This package will wrap all Exchange Web Service endpoints, but currently is focused on providing eDiscovery endpoints. 
 
 ************
 Features
 ************
 
-**pyews** has the following notable features in it's current release:
+**py-ews** has the following notable features in it's current release:
 
 * Autodiscover support
 * Delegation support
@@ -50,7 +50,7 @@ OS X & Linux:
 
 .. code-block:: guess
 
-   pip install pyews
+   pip install py-ews
 
 
 """""""""""""""""
@@ -59,14 +59,14 @@ Windows:
 
 .. code-block:: guess
 
-   pip install pyews
+   pip install py-ews
 
 
 """""""""""""""""
 Usage example
 """""""""""""""""
 
-The first step in using **pyews** is that you need to create a :doc:`configuration/userconfiguration` object.  Think of this as all the connection information for Exchange Web Services.  An example of creating a :doc:`configuration/userconfiguration` using Office 365 Autodiscover is:
+The first step in using **py-ews** is that you need to create a :doc:`configuration/userconfiguration` object.  Think of this as all the connection information for Exchange Web Services.  An example of creating a :doc:`configuration/userconfiguration` using Office 365 Autodiscover is:
 
 .. code-block:: python
    :linenos:
@@ -192,8 +192,8 @@ I am new to Unit Testing, but I am working on that as time permits.  If you woul
 Release History
 """""""""""""""""
 
-* 0.0.1
-    * Initial release of pyews and it is still considered a work in progress
+* 1.0.0
+    * Initial release of py-ews and it is still considered a work in progress
 
 """""""""""""""""
 Meta
