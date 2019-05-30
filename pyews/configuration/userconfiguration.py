@@ -100,15 +100,6 @@ class UserConfiguration(object):
                 self.properties = self.raw_soap
             else:
                 raise IncorrectParameters('If you are not using Autodiscover then you must provide a ewsUrl and exchangeVersion.')
-
-
-    @property
-    def configuration(self):
-        return Configuration(self)
-
-    @configuration.setter
-    def configuration(self):
-        pass
         
     @property
     def impersonation(self):
