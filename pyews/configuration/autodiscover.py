@@ -6,7 +6,7 @@ from bs4 import BeautifulSoup
 
 from pyews.configuration.endpoint import Endpoint
 from pyews.utils.exchangeversion import ExchangeVersion
-from pyews.utils.exceptions import IncorrectParameters, ExchangeVersionError, SoapResponseHasError, SoapConnectionRefused, SoapConnectionError
+from pyews.utils.exceptions import IncorrectParameters, ExchangeVersionError, SoapResponseHasError, SoapResponseIsNoneError, SoapConnectionRefused, SoapConnectionError
 
 __LOGGER__ = logging.getLogger(__name__)
 
@@ -140,23 +140,23 @@ class Autodiscover(object):
         soap_list = []
         for ver in self.exchangeVersion:
             for endpoint in self.endpoint:
-                __LOGGER__.info("Determining if {ep} is a valid endpoint".format(ep=endpoint))
+                __LOGGER__.debug("Determining if Exchange Version of {ver} and {ep} is a valid endpoint".format(ver=ver,ep=endpoint))
                 try:
                     requests.get(endpoint)
-                except requests.exceptions.RequestException as e:
-                    __LOGGER__.warning(
-                        "An {err} occurred attempting to connect to {ep} during autodiscover".format(
+                    soap_request = self._soap_request(endpoint, ver)
+                    autodiscover_result = self._send_autodiscover_payload(endpoint, soap_request)
+                    __LOGGER__.debug(autodiscover_result)
+                    if autodiscover_result:
+                        return autodiscover_result
+                except requests.RequestException as e:
+                    __LOGGER__.debug(
+                        "An Error {err} occurred when checking if Exchange Version {ver} and Autodiscover endpoint of {ep} is accessible.".format(
                             err=e.__class__.__name__,
+                            ver=ver,
                             ep=endpoint
-                        ),
-                        exc_info=True
+                        )
                     )
                     continue
-
-                soap_request = self._soap_request(endpoint, ver)
-                autodiscover_result = self._send_autodiscover_payload(endpoint, soap_request)
-                if autodiscover_result:
-                    return autodiscover_result
                     
 
     def requests_retry_session(
@@ -188,11 +188,12 @@ class Autodiscover(object):
         '''
         headers = {'content-type': 'text/xml'}
         try:
-            response = self.requests_retry_session().post(
+            response = requests.post(
                 endpoint,
                 data=soap_body,
-                headers=headers, 
-                auth=(self.credentials.email_address, self.credentials.password)
+                headers=headers,
+                auth=(self.credentials.email_address, self.credentials.password),
+                stream=True
             )
         except requests.exceptions.RequestException as e:
             __LOGGER__.warning(
@@ -202,9 +203,10 @@ class Autodiscover(object):
                 ),
                 exc_info=True
             )
-            raise SoapConnectionError('Error sending autodiscover payload to {ep}'.format(ep=endpoint))
 
+        __LOGGER__.debug('Raw Resposne from Requests is %s' % response.text)
         parsed_response = BeautifulSoup(response.content, 'xml')
+        __LOGGER__.debug('Parsed Response is %s' % parsed_response)
         if parsed_response.find('ErrorCode').string == 'NoError':
             return parsed_response
         
