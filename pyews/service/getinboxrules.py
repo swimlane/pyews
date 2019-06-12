@@ -15,7 +15,9 @@ class GetInboxRules (ServiceEndpoint):
         If you want to retrieve the inbox rules for a specific email address you must provide it when creating a GetInboxRules object.
             
         .. code-block:: python
-
+           from pyews import UserConfiguration
+           from pyews import GetInboxRules
+           
            userConfig = UserConfiguration(
                'first.last@company.com',
                'mypassword123'

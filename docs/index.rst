@@ -105,6 +105,9 @@ The returned results will then be deleted (moved to Deleted Items folder) from E
    :linenos:
 
    from pyews import UserConfiguration
+   from pyews import GetSearchableMailboxes
+   from pyews import SearchMailboxes
+   from pyews import DeleteItem
 
    userconfig = UserConfiguration(
        'myaccount@company.com',

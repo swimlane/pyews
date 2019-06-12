@@ -29,7 +29,9 @@ class DeleteItem(ServiceEndpoint):
         If you want to HardDelete a single message then provide a string value of the message ID and specify the `delete_type` as `HardDelete`:
             
         .. code-block:: python
-
+           from pyews import UserConfiguration
+           from pyews import DeleteItem
+           
            userConfig = UserConfiguration(
                'first.last@company.com',
                'mypassword123'

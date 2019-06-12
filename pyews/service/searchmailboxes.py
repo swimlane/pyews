@@ -37,6 +37,8 @@ class SearchMailboxes(ServiceEndpoint):
             By passing in a search_query, :doc:`../configuration/userconfiguration` object, and a mailbox_id we can search that specific mailbox or a list of mailbox referenceIds
 
             .. code-block:: python
+               from pyews import UserConfiguration
+               from pyews import SearchMailboxes
 
                userConfig = UserConfiguration(
                    'first.last@company.com',

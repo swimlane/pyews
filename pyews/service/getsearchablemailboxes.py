@@ -17,6 +17,8 @@ class GetSearchableMailboxes(ServiceEndpoint):
         You can acquire 
             
         .. code-block:: python
+           from pyews import UserConfiguration
+           from pyews import GetSearchableMailboxes
 
            userConfig = UserConfiguration(
                'first.last@company.com',
