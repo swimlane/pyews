@@ -3,7 +3,7 @@ import requests, re, logging
 from requests.adapters import HTTPAdapter
 from requests.packages.urllib3.util.retry import Retry
 
-from pyews.utils.exceptions import SoapResponseHasError, SoapAccessDeniedError
+from pyews.utils.exceptions import SoapResponseHasError, SoapAccessDeniedError, SoapConnectionError
 
 __LOGGER__ = logging.getLogger(__name__)
 
@@ -67,26 +67,6 @@ class ServiceEndpoint(object):
         '''
         self._raw_soap = value
 
-    def requests_retry_session(
-        self,
-        retries=20,
-        backoff_factor=0.3,
-        status_forcelist=(404, 500, 502, 504),
-        session=None,
-    ):
-        session = session or requests.Session()
-        retry = Retry(
-            total=retries,
-            read=retries,
-            connect=retries,
-            backoff_factor=backoff_factor,
-            status_forcelist=status_forcelist,
-        )
-        adapter = HTTPAdapter(max_retries=retry)
-        session.mount('http://', adapter)
-        session.mount('https://', adapter)
-        return session
-
     def invoke(self, soap_request):
         '''Used to invoke an Autodiscover SOAP request
         
@@ -98,11 +78,12 @@ class ServiceEndpoint(object):
             SoapResponseHasError: Raises an error when unable to parse a SOAP response
         '''
         try:
-            response = self.requests_retry_session().post(
-                self.userconfiguration.ewsUrl,
+            response = requests.post(
+                url=self.userconfiguration.ewsUrl,
                 data=soap_request,
-                headers=self.SOAP_REQUEST_HEADER, 
-                auth=(self.userconfiguration.credentials.email_address, self.userconfiguration.credentials.password)
+                headers=self.SOAP_REQUEST_HEADER,
+                auth=(self.userconfiguration.credentials.email_address, self.userconfiguration.credentials.password),
+                verify=False
             )
         except requests.exceptions.RequestException as e:
             __LOGGER__.warning(
