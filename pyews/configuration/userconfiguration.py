@@ -258,9 +258,9 @@ class UserConfiguration(object):
 
     def _parse_resolvenames_properties(self, config):
         temp = config.find('ServerVersionInfo')
-        ver = "%s.%s" % (
-            temp['MajorVersion'],
-            temp['MinorVersion']
+        ver = "{major}.{minor}".format(
+            major=temp['MajorVersion'],
+            minor=temp['MinorVersion']
         )
         self.exchangeVersion = ExchangeVersion(ver).exchangeVersion
         for item in config.find('ResolutionSet'):

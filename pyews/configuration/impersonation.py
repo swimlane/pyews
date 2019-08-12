@@ -45,7 +45,7 @@ class Impersonation(object):
         return '''<soap:Header>
   <t:ExchangeImpersonation>
     <t:ConnectingSID>
-      <t:%s>%s</t:%s>
+      <t:{start_type}>{value}</t:{end_type}>
     </t:ConnectingSID>
   </t:ExchangeImpersonation>
-</soap:Header>''' % (self.impersonation_type, self.impersonation_value, self.impersonation_type)
+</soap:Header>'''.format(start_type=self.impersonation_type, value=self.impersonation_value, end_type=self.impersonation_type)

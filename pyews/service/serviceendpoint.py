@@ -100,6 +100,6 @@ class ServiceEndpoint(object):
             self.raw_soap = parsed_response
             return
         elif parsed_response.find('ResponseCode').string == 'ErrorAccessDenied':
-            raise SoapAccessDeniedError('%s' % parsed_response.find('MessageText').string)
+            raise SoapAccessDeniedError('{}'.format(parsed_response.find('MessageText').string))
 
-        raise SoapResponseHasError('Unable to parse response from {current}' % self.__class__.__name__)
+        raise SoapResponseHasError('Unable to parse response from {current}'.format(current=self.__class__.__name__))
