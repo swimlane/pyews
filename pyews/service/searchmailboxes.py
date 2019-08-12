@@ -128,23 +128,23 @@ class SearchMailboxes(ServiceEndpoint):
                xmlns:t="http://schemas.microsoft.com/exchange/services/2006/types"
                xmlns:m="http://schemas.microsoft.com/exchange/services/2006/messages">
    <soap:Header>
-      <t:RequestServerVersion Version="%s" />
-      %s
+      <t:RequestServerVersion Version="{version}" />
+      {header}
    </soap:Header>
    <soap:Body >
       <m:SearchMailboxes>
          <m:SearchQueries>
             <t:MailboxQuery>
-               <t:Query>%s</t:Query>
+               <t:Query>{query}</t:Query>
                <t:MailboxSearchScopes>
-                  %s
+                  {scope}
                </t:MailboxSearchScopes>
             </t:MailboxQuery>
          </m:SearchQueries>
          <m:ResultType>PreviewOnly</m:ResultType>
       </m:SearchMailboxes>
    </soap:Body>
-</soap:Envelope>''' % (self.userconfiguration.exchangeVersion, impersonation_header, self.search_query, mailbox_search_scope)
+</soap:Envelope>'''.format(version=self.userconfiguration.exchangeVersion, header=impersonation_header, query=self.search_query, scope=mailbox_search_scope)
 
 
     def _mailbox_search_scope(self,  mailbox):
@@ -157,13 +157,13 @@ class SearchMailboxes(ServiceEndpoint):
         if (isinstance(mailbox, list)):
             for item in mailbox:
                 mailbox_soap_element += '''<t:MailboxSearchScope>
-        <t:Mailbox>%s</t:Mailbox>
-        <t:SearchScope>%s</t:SearchScope>
-    </t:MailboxSearchScope>''' % (item, self.search_scope)
+        <t:Mailbox>{mailbox}</t:Mailbox>
+        <t:SearchScope>{scope}</t:SearchScope>
+    </t:MailboxSearchScope>'''.format(mailbox=item, scope=self.search_scope)
         else:
             mailbox_soap_element = '''<t:MailboxSearchScope>
-        <t:Mailbox>%s</t:Mailbox>
-        <t:SearchScope>%s</t:SearchScope>
-    </t:MailboxSearchScope>''' % (mailbox, self.search_scope)
+        <t:Mailbox>{mailbox}</t:Mailbox>
+        <t:SearchScope>{scope}</t:SearchScope>
+    </t:MailboxSearchScope>'''.format(mailbox=mailbox, scope=self.search_scope)
 
         return mailbox_soap_element

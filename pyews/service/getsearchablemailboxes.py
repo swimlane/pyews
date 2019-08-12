@@ -100,12 +100,12 @@ class GetSearchableMailboxes(ServiceEndpoint):
                xmlns:t="http://schemas.microsoft.com/exchange/services/2006/types"
                xmlns:m="http://schemas.microsoft.com/exchange/services/2006/messages">
    <soap:Header>
-      <t:RequestServerVersion Version="%s" />
-      %s
+      <t:RequestServerVersion Version="{version}" />
+      {header}
    </soap:Header>
    <soap:Body >
       <m:GetSearchableMailboxes>
          <m:ExpandGroupMembership>true</m:ExpandGroupMembership>
       </m:GetSearchableMailboxes>
    </soap:Body>
-</soap:Envelope>''' % (self.userconfiguration.exchangeVersion, impersonation_header)
+</soap:Envelope>'''.format(version=self.userconfiguration.exchangeVersion, header=impersonation_header)

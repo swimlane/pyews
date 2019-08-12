@@ -42,8 +42,8 @@ class Endpoint(object):
         endpoint_list = []
         if self.domain:
             print(self.domain)
-            endpoint_list.append("https://%s/autodiscover/autodiscover.svc" % self.domain)
-            endpoint_list.append("https://autodiscover.%s/autodiscover/autodiscover.svc" % self.domain)
+            endpoint_list.append("https://{}/autodiscover/autodiscover.svc".format(self.domain))
+            endpoint_list.append("https://autodiscover.{}/autodiscover/autodiscover.svc".format(self.domain))
 
         endpoint_list.append('https://outlook.office365.com/autodiscover/autodiscover.svc')
         self._endpoint = endpoint_list

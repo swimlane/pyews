@@ -184,9 +184,9 @@ class Autodiscover(object):
                 exc_info=True
             )
 
-        __LOGGER__.debug('Raw Resposne from Requests is %s' % response.text)
+        __LOGGER__.debug('Raw Resposne from Requests is {}'.format(response.text))
         parsed_response = BeautifulSoup(response.content, 'xml')
-        __LOGGER__.debug('Parsed Response is %s' % parsed_response)
+        __LOGGER__.debug('Parsed Response is {}'.format(parsed_response))
         if parsed_response.find('ErrorCode').string == 'NoError':
             return parsed_response
         
@@ -206,16 +206,16 @@ class Autodiscover(object):
                xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"      
                xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">
   <soap:Header>
-    <a:RequestedServerVersion>%s</a:RequestedServerVersion>
+    <a:RequestedServerVersion>{version}</a:RequestedServerVersion>
     <wsa:Action>http://schemas.microsoft.com/exchange/2010/Autodiscover/Autodiscover/GetUserSettings</wsa:Action>
-    <wsa:To>%s</wsa:To>
+    <wsa:To>{to}</wsa:To>
   </soap:Header>
   <soap:Body>
     <a:GetUserSettingsRequestMessage xmlns:a="http://schemas.microsoft.com/exchange/2010/Autodiscover">
       <a:Request>
         <a:Users>
           <a:User>
-            <a:Mailbox>%s</a:Mailbox>
+            <a:Mailbox>{mailbox}</a:Mailbox>
           </a:User>
         </a:Users>
         <a:RequestedSettings>
@@ -233,5 +233,4 @@ class Autodiscover(object):
       </a:Request>
     </a:GetUserSettingsRequestMessage>
   </soap:Body>
-</soap:Envelope>''' % (version, url, self.credentials.email_address)
-
+</soap:Envelope>'''.format(version=version, to=url, mailbox=self.credentials.email_address)

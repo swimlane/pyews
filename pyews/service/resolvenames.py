@@ -73,8 +73,8 @@ class ResolveNames(ServiceEndpoint):
     <ResolveNames xmlns="http://schemas.microsoft.com/exchange/services/2006/messages"
                   xmlns:t="http://schemas.microsoft.com/exchange/services/2006/types"
                   ReturnFullContactData="true">
-      <UnresolvedEntry>%s</UnresolvedEntry>
+      <UnresolvedEntry>{email}</UnresolvedEntry>
     </ResolveNames>
   </soap:Body>
 </soap:Envelope>
-        ''' % self.userconfiguration.credentials.email_address
+        '''.format(self.userconfiguration.credentials.email_address)

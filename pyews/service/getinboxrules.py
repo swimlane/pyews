@@ -106,13 +106,13 @@ class GetInboxRules (ServiceEndpoint):
         xmlns:t="http://schemas.microsoft.com/exchange/services/2006/types"
         xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">
   <soap:Header>
-    <t:RequestServerVersion Version="%s" />
-    %s
+    <t:RequestServerVersion Version="{version}" />
+    {header}
   </soap:Header>
   <soap:Body>
     <m:GetInboxRules>
-      <m:MailboxSmtpAddress>%s</m:MailboxSmtpAddress>
+      <m:MailboxSmtpAddress>{email}</m:MailboxSmtpAddress>
     </m:GetInboxRules>
   </soap:Body>
 </soap:Envelope>
-        ''' % (self.userconfiguration.exchangeVersion, impersonation_header, email_address)
+        '''.format(version=self.userconfiguration.exchangeVersion, header=impersonation_header, email=email_address)

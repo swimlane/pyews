@@ -63,7 +63,7 @@ class DeleteItem(ServiceEndpoint):
         if delete_type in self.DELETE_TYPES:
             self.delete_type = delete_type
         else:
-            raise DeleteTypeError('You must provide one of the following delete types: %s' % self.DELETE_TYPES)
+            raise DeleteTypeError('You must provide one of the following delete types: {}'.format(self.DELETE_TYPES))
 
         self._soap_request = self.soap(self.messageId)
         self.invoke(self._soap_request)
@@ -120,17 +120,17 @@ class DeleteItem(ServiceEndpoint):
                xmlns:t="http://schemas.microsoft.com/exchange/services/2006/types"
                xmlns:m="http://schemas.microsoft.com/exchange/services/2006/messages">
    <soap:Header>
-      <t:RequestServerVersion Version="%s" />
-      %s
+      <t:RequestServerVersion Version="{version}" />
+      {header}
    </soap:Header>
    <soap:Body >
-    <DeleteItem DeleteType="%s" xmlns="http://schemas.microsoft.com/exchange/services/2006/messages">
+    <DeleteItem DeleteType="{type}" xmlns="http://schemas.microsoft.com/exchange/services/2006/messages">
       <ItemIds>
-        %s
+        {soap_element}
       </ItemIds>
     </DeleteItem>
   </soap:Body>
-</soap:Envelope>''' % (self.userconfiguration.exchangeVersion, impersonation_header, self.delete_type, delete_item_soap_element)
+</soap:Envelope>'''.format(version=self.userconfiguration.exchangeVersion, header=impersonation_header, type=self.delete_type, soap_element=delete_item_soap_element)
         
 
     def _delete_item_soap_string(self, item):
@@ -142,7 +142,7 @@ class DeleteItem(ServiceEndpoint):
         item_soap_string = ''
         if (isinstance(item, list)):
             for i in item:
-                item_soap_string += '''<t:ItemId Id="%s"/>''' % i
+                item_soap_string += '''<t:ItemId Id="{}"/>'''.format(i)
         else:
-            item_soap_string = '''<t:ItemId Id="%s"/>''' % item
+            item_soap_string = '''<t:ItemId Id="{}"/>'''.format(item)
         return item_soap_string
