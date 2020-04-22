@@ -77,4 +77,4 @@ class ResolveNames(ServiceEndpoint):
     </ResolveNames>
   </soap:Body>
 </soap:Envelope>
-        '''.format(self.userconfiguration.credentials.email_address)
+        '''.format(email=self.userconfiguration.credentials.email_address)
