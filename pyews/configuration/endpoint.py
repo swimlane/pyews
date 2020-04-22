@@ -41,7 +41,6 @@ class Endpoint(object):
     def endpoint(self, value):
         endpoint_list = []
         if self.domain:
-            print(self.domain)
             endpoint_list.append("https://{}/autodiscover/autodiscover.svc".format(self.domain))
             endpoint_list.append("https://autodiscover.{}/autodiscover/autodiscover.svc".format(self.domain))
 
