@@ -3,7 +3,7 @@ from bs4 import BeautifulSoup
 
 from .serviceendpoint import ServiceEndpoint
 from pyews.utils.exchangeversion import ExchangeVersion
-from pyews.utils.exceptions import ObjectType, DeleteTypeError, SoapResponseHasError, SoapAccessDeniedError
+from pyews.utils.exceptions import ObjectType, DeleteTypeError, SoapResponseHasError, SoapAccessDeniedError, SearchScopeError
 
 
 class SearchMailboxes(ServiceEndpoint):
