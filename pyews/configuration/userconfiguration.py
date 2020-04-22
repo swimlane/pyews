@@ -7,7 +7,7 @@ from .autodiscover import Autodiscover
 from .impersonation import Impersonation
 
 from pyews.service.resolvenames import ResolveNames
-from pyews.utils.exceptions import ObjectType, IncorrectParameters, ExchangeVersionError, UserConfigurationError
+from pyews.utils.exceptions import ObjectType, IncorrectParameters, ExchangeVersionError, UserConfigurationError, CredentialsError
 from pyews.utils.exchangeversion import ExchangeVersion
 
 __LOGGER__ = logging.getLogger(__name__)
