@@ -4,8 +4,8 @@ from pyews import UserConfiguration
 # Example of using Autodiscover
 
 userconfig = UserConfiguration(
-   'hackathon@swimlaneresearchdev.onmicrosoft.com',
-   'TWdrMHQUr7qNe!',
+   'first.last@dev.onmicrosoft.com',
+   'password',
 )
 
 # you can print properties on the useconfig object if needed
@@ -21,8 +21,8 @@ userconfig = UserConfiguration(
 # Example of NOT using Autodiscover
 '''
 userconfig = UserConfiguration(
-   'hackathon@swimlaneresearchdev.onmicrosoft.com',
-   'TWdrMHQUr7qNe!',
+   'first.last@dev.onmicrosoft.com',
+   'password',
    autodiscover=False,
    ewsUrl='https://autodiscover-s.outlook.com/EWS/Exchange.asmx'
 )
@@ -72,4 +72,4 @@ for search in SearchMailboxes('subject:"OMG PHISHING EMAIL"', userconfig, refere
 # We can get InboxRules as well
 
 #from pyews import GetInboxRules
-#mailboxRules = GetInboxRules('hackathon@swimlaneresearchdev.onmicrosoft.com', userconfig).response
+#mailboxRules = GetInboxRules('first.last@dev.onmicrosoft.com', userconfig).response

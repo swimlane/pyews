@@ -1,9 +1,9 @@
 import unittest
-from userconfiguration import UserConfiguration
+from pyews import UserConfiguration
 
 class TestUserConfiguration(unittest.TestCase):
-    self.username = 'hackathon@swimlaneresearchdev.onmicrosoft.com'
-    self.password = 'TWdrMHQUr7qNe!'
+    self.username = 'first.last@dev.onmicrosoft.com'
+    self.password = 'password'
 
     def test_credentials_username(self):
         result = UserConfiguration(self.username, self.password)

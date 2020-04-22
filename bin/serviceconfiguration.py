@@ -159,4 +159,4 @@ class ServiceConfiguration(object):
 </soap:Envelope>'''
 
 
-print(ServiceConfiguration('hackathon@swimlaneresearchdev.onmicrosoft.com','TWdrMHQUr7qNe!'))
+print(ServiceConfiguration('first.last@dev.onmicrosoft.com','password!'))
