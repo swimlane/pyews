@@ -53,9 +53,7 @@ class ExchangeVersion(object):
     EXCHANGE_VERSIONS = ['Exchange2019', 'Exchange2016', 'Exchange2013_SP1', 'Exchange2013', 'Exchange2010_SP2', 'Exchange2010_SP1', 'Exchange2010']
 
     def __init__(self, version):
-
         self.exchangeVersion = self._get_api_version(version)
-
 
     def _get_api_version(self, version):
         '''Gets a string representation of an Exchange Version number
@@ -67,7 +65,7 @@ class ExchangeVersion(object):
             str: A string representation of a Exchange Version number. Example: Exchange2016
         '''
 
-        if version is '15.0.847.32':
+        if version == '15.0.847.32':
             return 'Exchange2013_SP1'
         else:
             ver = version.split('.')
@@ -84,11 +82,9 @@ class ExchangeVersion(object):
             bool: Returns either True or False if the passed in version is an acceptable Exchange Version
         '''
 
-        if version is 'Office365':
+        if version == 'Office365':
             return True
         elif version in ExchangeVersion.EXCHANGE_VERSIONS:
             return True
             
         return False
-
-    

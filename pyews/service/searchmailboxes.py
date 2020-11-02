@@ -116,7 +116,7 @@ class SearchMailboxes(ServiceEndpoint):
         Returns:
             str: Returns the SOAP XML request body
         '''
-        if (self.userconfiguration.impersonation):
+        if self.userconfiguration.impersonation:
             impersonation_header = self.userconfiguration.impersonation.header
         else:
             impersonation_header = ''
@@ -154,7 +154,7 @@ class SearchMailboxes(ServiceEndpoint):
             str: Returns the MailboxSearchScope SOAP XML element(s)
         '''
         mailbox_soap_element = ''
-        if (isinstance(mailbox, list)):
+        if isinstance(mailbox, list):
             for item in mailbox:
                 mailbox_soap_element += '''<t:MailboxSearchScope>
         <t:Mailbox>{mailbox}</t:Mailbox>

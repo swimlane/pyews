@@ -183,7 +183,7 @@ class UserConfiguration(object):
             ExchangeVersionError: An error occurred when attempting to verify that the value passed in was a valid ExchangeVersion
         '''
         if ExchangeVersion.valid_version(value):
-            if value is 'Office365' or 'Exchange2016':
+            if value == 'Office365' or value == 'Exchange2016':
                 self._exchangeVersion = 'Exchange2016'
             else:
                 self._exchangeVersion = value

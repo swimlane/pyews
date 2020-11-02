@@ -90,7 +90,7 @@ class GetSearchableMailboxes(ServiceEndpoint):
         Returns:
             str: Returns the SOAP XML request body
         '''
-        if (self.userconfiguration.impersonation):
+        if self.userconfiguration.impersonation:
             impersonation_header = self.userconfiguration.impersonation.header
         else:
             impersonation_header = ''
