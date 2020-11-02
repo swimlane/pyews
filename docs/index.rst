@@ -31,11 +31,13 @@ Features
 * Search a list of (or single) mailboxes in your Exchange environment using all supported search attributes
 * Delete email items from mailboxes in your Exchange environment
 * Retrieve mailbox inbox rules for a specific account
+* Find additional hidden inbox rules for a specified account
 
 Currently this package supports the following :doc:`services/serviceendpoint`:'s:
 
 * :doc:`services/deleteitem`
 * :doc:`services/getinboxrules`
+* :doc:`services/findhiddeninboxrules` (Retrieving hidden inbox rules)
 * :doc:`services/getsearchablemailboxes`
 * :doc:`services/resolvenames`
 * :doc:`services/searchmailboxes`
