@@ -26,12 +26,14 @@ A Python package to interact with Exchange Web Services
 * Search a list of (or single) mailboxes in your Exchange environment using all supported search attributes
 * Delete email items from mailboxes in your Exchange environment
 * Retrieve mailbox inbox rules for a specific account
+* Find additional hidden inbox rules for a specified account
 
 Currently this package supports the following ServiceEndpoints:
 
 * Autodiscover
 * DeleteItem
 * GetInboxRules
+* FindItems (Retrieving hidden inbox rules)
 * GetSearchableMailboxes
 * ResolveNames
 * SearchMailboxes
@@ -161,10 +163,13 @@ docker run pyews
 
 ## Release History
 
-* 1.0.0
-   * Initial release of py-ews to PyPi
+* 1.1.0
+   * Fixed bug with inbox rules
+   * Added feature to find hidden inbox rules
 * 1.0.1
    * Updating Documentation with new reference links
+* 1.0.0
+   * Initial release of py-ews to PyPi
 
 ## Meta
 

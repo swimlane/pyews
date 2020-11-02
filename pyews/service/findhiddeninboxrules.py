@@ -5,8 +5,8 @@ from .serviceendpoint import ServiceEndpoint
 from pyews.utils.exceptions import ObjectType, SoapResponseHasError, SoapAccessDeniedError
 
 
-class GetInboxRules (ServiceEndpoint):
-    '''Child class of doc:`serviceendpoint` that retrieves inbox (mailbox) rules for a specified email address.
+class FindHiddenInboxRules (ServiceEndpoint):
+    '''Child class of doc:`serviceendpoint` that retrieves hidden inbox (mailbox) rules for a users email address specificed by impersonation headers.
     
     Examples:
         To use any service class you must provide a :doc:`../configuration/userconfiguration` object first.
@@ -23,10 +23,9 @@ class GetInboxRules (ServiceEndpoint):
                'mypassword123'
            )
 
-           inboxRules = GetInboxRules('first.last@company.com', userConfig)
+           inboxRules = GetInboxRules('first.last@company.com', userConfig, hidden_rules=True)
 
     Args:
-        smtp_address (str): The email address you want to get inbox rules for
         userconfiguration (UserConfiguration): A :doc:`../configuration/userconfiguration` object created using the UserConfiguration class
 
     Raises:
@@ -35,11 +34,9 @@ class GetInboxRules (ServiceEndpoint):
         ObjectType: An incorrect object type has been used
     '''
     
-    def __init__(self, smtp_address, userconfiguration, hidden_rules=False):
-        self.hidden_rules = hidden_rules
-        self.email_address = smtp_address
-        super(GetInboxRules, self).__init__(userconfiguration)
-        self._soap_request = self.soap(self.email_address)
+    def __init__(self, userconfiguration):
+        super(FindHiddenInboxRules, self).__init__(userconfiguration)
+        self._soap_request = self.soap()
         self.invoke(self._soap_request)
         self.response = self.raw_soap
 
@@ -85,21 +82,15 @@ class GetInboxRules (ServiceEndpoint):
             for item in value.find('InboxRules'):
                 if item.name == 'Rule' and item:
                     return_list.append(self.__process_rule_properties(item))
-        if self.hidden_rules:
-            from .findhiddeninboxrules import FindHiddenInboxRules
-            return_list.append(FindHiddenInboxRules(self.userconfiguration).response)
-        self._response = return_list
+            self._response = return_list
 
-    def soap(self, email_address):
+    def soap(self):
         '''Creates the SOAP XML message body
-
-        Args:
-            email_address (str): A single email addresses you want to GetInboxRules for
 
         Returns:
             str: Returns the SOAP XML request body
         '''
-        if self.userconfiguration.impersonation:
+        if (self.userconfiguration.impersonation):
             impersonation_header = self.userconfiguration.impersonation.header
         else:
             impersonation_header = ''
@@ -114,9 +105,32 @@ class GetInboxRules (ServiceEndpoint):
     {header}
   </soap:Header>
   <soap:Body>
-    <m:GetInboxRules>
-      <m:MailboxSmtpAddress>{email}</m:MailboxSmtpAddress>
-    </m:GetInboxRules>
+    <m:FindItem Traversal="Shallow">
+        <m:ItemShape>
+            <t:BaseShape>IdOnly</t:BaseShape>
+            <t:AdditionalProperties>
+                <t:ExtendedFieldURI PropertyTag="0x65EC" PropertyType="String" />
+                <t:ExtendedFieldURI PropertyTag="0x0E99" PropertyType="Binary" />
+                <t:ExtendedFieldURI PropertyTag="0x0E9A" PropertyType="Binary" />
+                <t:ExtendedFieldURI PropertyTag="0x65E9" PropertyType="Integer" />
+                <t:ExtendedFieldURI PropertyTag="0x6800" PropertyType="String" />
+                <t:ExtendedFieldURI PropertyTag="0x65EB" PropertyType="String" />
+                <t:ExtendedFieldURI PropertyTag="0x3FEA" PropertyType="Boolean" />
+                <t:ExtendedFieldURI PropertyTag="0x6645" PropertyType="Binary" />
+            </t:AdditionalProperties>
+        </m:ItemShape>
+        <m:Restriction>
+            <t:IsEqualTo>
+                <t:FieldURI FieldURI="item:ItemClass" />
+                <t:FieldURIOrConstant>
+                    <t:Constant Value="IPM.Rule.Version2.Message" />
+                </t:FieldURIOrConstant>
+            </t:IsEqualTo>
+      </m:Restriction>
+    <m:ParentFolderIds>
+        <t:DistinguishedFolderId Id="inbox" />
+    </m:ParentFolderIds>
+    </m:FindItem>
   </soap:Body>
 </soap:Envelope>
-        '''.format(version=self.userconfiguration.exchangeVersion, header=impersonation_header, email=email_address)
+        '''.format(version=self.userconfiguration.exchangeVersion, header=impersonation_header)
