@@ -45,6 +45,27 @@ class GetInboxRules (ServiceEndpoint):
         self.invoke(self._soap_request)
         self.response = self.raw_soap
 
+    def __process_rule_properties(self, item):
+        if item:
+            return_dict = {}
+            for prop in item:
+                if prop.name != 'Conditions' and prop.name != 'Actions':
+                    if prop.name not in return_dict:
+                        return_dict[prop.name] = prop.string
+            for condition in item.find('Conditions'):
+                if 'conditions' not in return_dict:
+                    return_dict['conditions'] = []
+                return_dict['conditions'].append({
+                    condition.name: condition.string
+                })
+            for action in item.find('Actions'):
+                if 'actions' not in return_dict:
+                    return_dict['actions'] = []
+                return_dict['actions'].append({
+                    action.name: action.string
+                })
+            return return_dict
+
     @property
     def response(self):
         '''GetInboxRules SOAP response
@@ -63,27 +84,9 @@ class GetInboxRules (ServiceEndpoint):
         '''
         return_list = []
         if value.find('ResponseCode').string == 'NoError':
-            for item in value.find('Rule'):
-                return_dict = {}
-                if (item.name == 'Conditions'):
-                    for child in item.descendants:
-                        if (child.name is not None and child.string is not None):
-                            return_dict.update({
-                                child.name: child.string
-                            })
-                if (item.name == 'Actions'):
-                    for child in item.descendants:
-                        if (child.name is not None and child.string is not None):
-                            return_dict.update({
-                                child.name: child.string
-                            })
-                else:
-                    return_dict.update({
-                        item.name: item.string
-                    })
-                    
-                return_list.append(return_dict)
-            self._response = return_list
+            for item in value.find('InboxRules'):
+                if item.name == 'Rule' and item:
+                    return_list.append(self.__process_rule_properties(item))
 
 
     def soap(self, email_address):
@@ -95,7 +98,7 @@ class GetInboxRules (ServiceEndpoint):
         Returns:
             str: Returns the SOAP XML request body
         '''
-        if (self.userconfiguration.impersonation):
+        if self.userconfiguration.impersonation:
             impersonation_header = self.userconfiguration.impersonation.header
         else:
             impersonation_header = ''
