@@ -82,6 +82,10 @@ class DeleteItem(ServiceEndpoint):
             })
         return return_list
 
+    def run(self):
+        self.raw_xml = self.invoke(self.soap(self.message_id))
+        return self.__parse_response(self.raw_xml)
+
     def soap(self, item):
         '''Creates the SOAP XML message body
 
