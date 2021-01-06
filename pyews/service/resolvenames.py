@@ -1,8 +1,6 @@
-import requests
-from bs4 import BeautifulSoup
-
 from .serviceendpoint import ServiceEndpoint
-from pyews.utils.exceptions import ObjectType, SoapResponseHasError, SoapAccessDeniedError
+from ..utils.exceptions import ObjectType, SoapResponseHasError, SoapAccessDeniedError
+from ..utils.exchangeversion import ExchangeVersion
 
 
 class ResolveNames(ServiceEndpoint):
@@ -31,32 +29,40 @@ class ResolveNames(ServiceEndpoint):
         Raises:
             ObjectType: An incorrect object type has been used
         '''
-
     def __init__(self, userconfiguration):
-
         super(ResolveNames, self).__init__(userconfiguration)
-        
-        self._soap_request = self.soap()
-        self.invoke(self._soap_request)
-        self.response = self.raw_soap
 
-    @property
-    def response(self):
-        '''ResolveNames SOAP response
-        
-        Returns:
-            str: Returns the ResolveNames response
-        '''
-        return self._response
-
-    @response.setter
-    def response(self, value):
+    def __parse_response(self, value):
         '''Creates and sets a response object
 
         Args:
             value (str): The raw response from a SOAP request
         '''
-        self._response = value
+        return_dict = {}
+        if value.find('ResolveNamesResponse'):
+            temp = value.find('ServerVersionInfo')
+            return_dict['server_version_info'] = temp
+            ver = "{major}.{minor}".format(
+                major=temp['MajorVersion'],
+                minor=temp['MinorVersion']
+            )
+            self.exchange_version = ExchangeVersion(ver).exchangeVersion
+            for item in value.find('ResolutionSet'):
+                if item.find('Mailbox'):
+                    for i in item.find('Mailbox'):
+                        return_dict[i.name] = i.string
+                if item.find('Contact'):
+                    for i in item.find('Contact').descendants:
+                        if i.name == 'Entry' and i.string:
+                            return_dict[i.name] = i.string
+                        else:
+                            if i.name and i.string:
+                                return_dict[i.name] = i.string
+        return return_dict
+
+    def run(self):
+        self.raw_xml = self.invoke(self.soap())
+        return self.__parse_response(self.raw_xml)
 
     def soap(self):
         '''Creates the SOAP XML message body
@@ -65,10 +71,12 @@ class ResolveNames(ServiceEndpoint):
             str: Returns the SOAP XML request body
         '''
         return '''<?xml version="1.0" encoding="utf-8"?>
-<soap:Envelope xmlns:a="http://schemas.microsoft.com/exchange/2010/Autodiscover"      
-               xmlns:wsa="http://www.w3.org/2005/08/addressing" 
-               xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"      
-               xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">
+<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/"
+               xmlns:t="http://schemas.microsoft.com/exchange/services/2006/types"
+               xmlns:m="http://schemas.microsoft.com/exchange/services/2006/messages">
+<soap:Header>
+      <t:RequestServerVersion Version="{version}" />
+   </soap:Header>
   <soap:Body>
     <ResolveNames xmlns="http://schemas.microsoft.com/exchange/services/2006/messages"
                   xmlns:t="http://schemas.microsoft.com/exchange/services/2006/types"
@@ -77,4 +85,6 @@ class ResolveNames(ServiceEndpoint):
     </ResolveNames>
   </soap:Body>
 </soap:Envelope>
-        '''.format(email=self.userconfiguration.credentials.email_address)
+        '''.format(
+            version=self.userconfiguration.exchange_version, 
+            email=self.userconfiguration.credentials.email_address)
