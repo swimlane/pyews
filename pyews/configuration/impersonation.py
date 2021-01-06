@@ -1,6 +1,6 @@
 
 
-class Impersonation(object):
+class Impersonation:
     '''The Impersonation class is used when you want to impersonate a user.  You must access rights to impersonate a specific user within your Exchange environment.
     
     Example:
@@ -21,9 +21,7 @@ class Impersonation(object):
     Raises:
         AttributeError: This will raise when you call this class but do not provide at least 1 parameter
     '''
-
     def __init__(self, principalname=None, sid=None, primarysmtpaddress=None, smtpaddress=None):
-
         if principalname:
             self.impersonation_type = 'PrincipalName'
             self.impersonation_value = principalname
@@ -39,13 +37,18 @@ class Impersonation(object):
         else:
             raise AttributeError('By setting impersonation to true you must provide either a PrincipalName, SID, PrimarySmtpAddress, or SmtpAddress')
 
-        self.header = self._create_impersonation_header()
+    def get(self):
+        return self.__create_impersonation_header()
 
-    def _create_impersonation_header(self):
+    def __create_impersonation_header(self):
         return '''<soap:Header>
   <t:ExchangeImpersonation>
     <t:ConnectingSID>
       <t:{start_type}>{value}</t:{end_type}>
     </t:ConnectingSID>
   </t:ExchangeImpersonation>
-</soap:Header>'''.format(start_type=self.impersonation_type, value=self.impersonation_value, end_type=self.impersonation_type)
+</soap:Header>'''.format(
+    start_type=self.impersonation_type, 
+    value=self.impersonation_value, 
+    end_type=self.impersonation_type
+)
