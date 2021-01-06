@@ -1,5 +1,4 @@
-import requests, re
-from bs4 import BeautifulSoup
+import re
 
 from .serviceendpoint import ServiceEndpoint
 from pyews.utils.exchangeversion import ExchangeVersion
@@ -59,34 +58,15 @@ class SearchMailboxes(ServiceEndpoint):
             SearchScopeError: The provided search scope is not one of the following options: ['All', 'PrimaryOnly', 'ArchiveOnly']
         '''
 
-    def __init__(self, search_query, userconfiguration, mailbox_id, search_scope='All'):
-
+    def __init__(self, search_query, userconfiguration, search_scope='All'):
         self.search_query = search_query
-        
         super(SearchMailboxes, self).__init__(userconfiguration)
-
-        self.mailbox_list = mailbox_id
-
-        if (search_scope in ['All', 'PrimaryOnly', 'ArchiveOnly']):
+        if search_scope in ['All', 'PrimaryOnly', 'ArchiveOnly']:
             self.search_scope = search_scope
         else:
             raise SearchScopeError('Please use the default SearchScope of All or specify PrimaryOnly or ArchiveOnly')
 
-        self._soap_request = self.soap(self.mailbox_list)
-        self.invoke(self._soap_request)
-        self.response = self.raw_soap
-
-    @property
-    def response(self):
-        '''Formatted response from SearchMailboxes endpoint.  A list is returned of all identified messages matching search query.
-        
-        Returns:
-            str: Returns the SearchMailboxes response
-        '''
-        return self._response
-
-    @response.setter
-    def response(self, value):
+    def __parse_response(self, value):
         '''Creates and sets a response object
         
         Args:
@@ -104,8 +84,11 @@ class SearchMailboxes(ServiceEndpoint):
                             i.name: i.string
                         })
                 return_list.append(return_dict)
-            self._response = return_list
-              
+        return return_list
+
+    def run(self, mailbox_list):
+        self.raw_xml = self.invoke(self.soap(mailbox_list))
+        return self.__parse_response(self.raw_xml)
 
     def soap(self, mailbox):
         '''Creates the SOAP XML message body
@@ -144,8 +127,11 @@ class SearchMailboxes(ServiceEndpoint):
          <m:ResultType>PreviewOnly</m:ResultType>
       </m:SearchMailboxes>
    </soap:Body>
-</soap:Envelope>'''.format(version=self.userconfiguration.exchangeVersion, header=impersonation_header, query=self.search_query, scope=mailbox_search_scope)
-
+</soap:Envelope>'''.format(
+    version=self.userconfiguration.exchangeVersion, 
+    header=impersonation_header, 
+    query=self.search_query, 
+    scope=mailbox_search_scope)
 
     def _mailbox_search_scope(self,  mailbox):
         '''Creates a MailboxSearchScope XML element from a single or list of mailbox ReferenceIds
