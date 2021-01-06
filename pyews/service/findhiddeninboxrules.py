@@ -36,9 +36,6 @@ class FindHiddenInboxRules (ServiceEndpoint):
     
     def __init__(self, userconfiguration):
         super(FindHiddenInboxRules, self).__init__(userconfiguration)
-        self._soap_request = self.soap()
-        self.invoke(self._soap_request)
-        self.response = self.raw_soap
 
     def __process_rule_properties(self, item):
         if item:
@@ -61,17 +58,7 @@ class FindHiddenInboxRules (ServiceEndpoint):
                 })
             return return_dict
 
-    @property
-    def response(self):
-        '''GetInboxRules SOAP response
-        
-        Returns:
-            list: Returns a formatted list of dictionaries of a SOAP response
-        '''
-        return self._response
-
-    @response.setter
-    def response(self, value):
+    def __parse_response(self, value):
         '''Creates and sets a response object
         
         Args:
@@ -82,7 +69,11 @@ class FindHiddenInboxRules (ServiceEndpoint):
             for item in value.find('InboxRules'):
                 if item.name == 'Rule' and item:
                     return_list.append(self.__process_rule_properties(item))
-            self._response = return_list
+        return return_list
+
+    def run(self):
+        self.raw_xml = self.invoke(self.soap())
+        return self.__parse_response(self.raw_xml)
 
     def soap(self):
         '''Creates the SOAP XML message body
