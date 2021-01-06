@@ -81,10 +81,8 @@ class ExchangeVersion(object):
         Returns:
             bool: Returns either True or False if the passed in version is an acceptable Exchange Version
         '''
-
         if version == 'Office365':
             return True
         elif version in ExchangeVersion.EXCHANGE_VERSIONS:
             return True
-            
         return False
