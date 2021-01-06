@@ -8,39 +8,39 @@ from pyews.utils.exceptions import ObjectType, DeleteTypeError, SoapResponseHasE
 
 class DeleteItem(ServiceEndpoint):
     '''Child class of :doc:`serviceendpoint` which deletes items (typically email messages) from a users mailboxes.
-    
+
     Examples:
         To use any service class you must provide a :doc:`../configuration/userconfiguration` object first.
         Like all service classes, you can access formatted properties from the EWS endpoint using the `response` property.
-        
+
         If you want to move a single message to the `Deleted Items` folder then provide a string value of the message ID.  The default `delete_type` is to move a message to the `Deleted Items` folder.
-            
+
         .. code-block:: python
 
            userConfig = UserConfiguration(
                'first.last@company.com',
                'mypassword123'
            )
-        
+
            messageId = 'AAMkAGZjOTlkOWExLTM2MDEtNGI3MS04ZDJiLTllNzgwNDQxMThmMABGAAAAAABdQG8UG7qjTKf0wCVbqLyMBwC6DuFzUH4qRojG/OZVoLCfAAAAAAEMAAC6DuFzUH4qRojG/OZVoLCfAAAu4Y9UAAA='
 
            deleteItem = DeleteItem(messageId, userConfig)
 
         If you want to HardDelete a single message then provide a string value of the message ID and specify the `delete_type` as `HardDelete`:
-            
+
         .. code-block:: python
            from pyews import UserConfiguration
            from pyews import DeleteItem
-           
+
            userConfig = UserConfiguration(
                'first.last@company.com',
                'mypassword123'
            )
-        
+
            messageId = 'AAMkAGZjOTlkOWExLTM2MDEtNGI3MS04ZDJiLTllNzgwNDQxMThmMABGAAAAAABdQG8UG7qjTKf0wCVbqLyMBwC6DuFzUH4qRojG/OZVoLCfAAAAAAEMAAC6DuFzUH4qRojG/OZVoLCfAAAu4Y9UAAA='
 
            deleteItem = DeleteItem(messageId, userConfig, delete_type='HardDelete')
-           
+
     Args:
         messageId (list or str): An email MessageId to delete
         userconfiguration (UserConfiguration): A UserConfiguration object created using the UserConfiguration class
