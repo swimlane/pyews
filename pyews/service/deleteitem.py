@@ -95,12 +95,12 @@ class DeleteItem(ServiceEndpoint):
         Returns:
             str: Returns the SOAP XML request body
         '''
-        if (self.userconfiguration.impersonation):
+        if self.userconfiguration.impersonation:
             impersonation_header = self.userconfiguration.impersonation.header
         else:
             impersonation_header = ''
 
-        delete_item_soap_element = self._delete_item_soap_string(item)
+        delete_item_soap_element = self.__delete_item_soap_string(item)
         return '''<?xml version="1.0" encoding="UTF-8"?>
 <soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/"
                xmlns:t="http://schemas.microsoft.com/exchange/services/2006/types"
@@ -116,10 +116,14 @@ class DeleteItem(ServiceEndpoint):
       </ItemIds>
     </DeleteItem>
   </soap:Body>
-</soap:Envelope>'''.format(version=self.userconfiguration.exchangeVersion, header=impersonation_header, type=self.delete_type, soap_element=delete_item_soap_element)
-        
+</soap:Envelope>'''.format(
+    version=self.userconfiguration.exchangeVersion, 
+    header=impersonation_header, 
+    type=self.delete_type, 
+    soap_element=delete_item_soap_element
+    )
 
-    def _delete_item_soap_string(self, item):
+    def __delete_item_soap_string(self, item):
         '''Creates a ItemId XML element from a single or list of items
 
         Returns:
