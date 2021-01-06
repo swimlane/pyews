@@ -12,10 +12,12 @@ from ..utils.exchangeversion import ExchangeVersion
 __LOGGER__ = logging.getLogger(__name__)
 
 
-class UserConfiguration(object):
-    '''UserConfiguration is the main class of pyews.  It is used by all other ServiceEndpoint parent and child classes.  
+class UserConfiguration:
+    '''UserConfiguration is the main class of pyews.
+
+    It is used by all other ServiceEndpoint parent and child classes.  
     This class represents how you authorize communication with all other SOAP requests throughout this package.
-        
+
     Examples:
 
         The UserConfiguration class is the main class used by all services, including the parent class of services called ServiceEndpoint. 
@@ -25,16 +27,16 @@ class UserConfiguration(object):
         The traditional UserConfiguration object can be created by just passing in a username and password.  This will attempt to connect using Autodiscover and will attempt every version of Exchange.
 
             .. code-block:: python
-             
+
                userConfig = UserConfiguration(
                    'first.last@company.com',
                    'mypassword123'
                )
 
         If you the know the Exchange version you want to communicate with you can provide this information:
-            
+
             .. code-block:: python
-             
+
                userConfig = UserConfiguration(
                    'first.last@company.com',
                    'mypassword123',
@@ -44,7 +46,7 @@ class UserConfiguration(object):
         If you do not wish to use Autodiscover then you can tell UserConfiguration to not use it by setting autodiscover to False and provide the ewsUrl instead
 
             .. code-block:: python
-             
+
                userConfig = UserConfiguration(
                    'first.last@company.com',
                    'mypassword123',
@@ -55,7 +57,7 @@ class UserConfiguration(object):
         If you would like to use impersonation, you first need to create an Impersonation object and pass that into the UserConfiguration class when creating a user configuration object.
 
             .. code-block:: python
-             
+
                impersonation = Impersonation(primarysmtpaddress='first.last@company.com')
 
                userConfig = UserConfiguration(
@@ -79,7 +81,7 @@ class UserConfiguration(object):
         sid ([type], optional): Defaults to None. Only used when impersonation is set to True.  The SID of the account you want to impersonate
         primarysmtpaddress ([type], optional): Defaults to None. Only used when impersonation is set to True.  The PrimarySmtpAddress of the account you want to impersonate
         smtpaddress ([type], optional): Defaults to None. Only used when impersonation is set to True.  The SmtpAddress of the account you want to impersonate
-    
+
     Raises:
         IncorrectParameters: Provided an incorrect configuration of parameters to this class
     '''
