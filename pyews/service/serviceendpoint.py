@@ -1,5 +1,5 @@
 from bs4 import BeautifulSoup
-import requests, re, logging
+import requests, logging
 from requests.adapters import HTTPAdapter
 from requests.packages.urllib3.util.retry import Retry
 
@@ -8,7 +8,7 @@ from pyews.utils.exceptions import SoapResponseHasError, SoapAccessDeniedError, 
 __LOGGER__ = logging.getLogger(__name__)
 
 
-class ServiceEndpoint(object):
+class ServiceEndpoint:
     
     SOAP_REQUEST_HEADER = {'content-type': 'text/xml; charset=UTF-8'}
 
@@ -18,10 +18,7 @@ class ServiceEndpoint(object):
         Args:
             userconfiguration (UserConfiguration): A UserConfiguration object created using the UserConfiguration class
         '''
-
         self.userconfiguration = userconfiguration
-
-        self.results = []
 
     @property
     def userconfiguration(self):
@@ -39,33 +36,9 @@ class ServiceEndpoint(object):
         Args:
             config (UserConfiguration): A UserConfiguration object created using the UserConfiguration class
         '''
-
-        # deferring importing of userconfiguration until now.
-        # This definitely feels hacky but for now 
-        # we are going to do this until we have a better solution
-
         from ..configuration.userconfiguration import UserConfiguration
-
         if isinstance(config, UserConfiguration):
             self._userconfiguration = config
-
-    @property
-    def raw_soap(self):
-        '''Returns the raw SOAP response
-        
-        Returns:
-            str: Raw SOAP XML response
-        '''
-        return self._raw_soap
-
-    @raw_soap.setter
-    def raw_soap(self, value):
-        '''Sets the raw soap and response from a SOAP request
-        
-        Args:
-            value (str): The response from a SOAP request
-        '''
-        self._raw_soap = value
 
     def invoke(self, soap_request):
         '''Used to invoke an Autodiscover SOAP request
@@ -79,27 +52,29 @@ class ServiceEndpoint(object):
         '''
         try:
             response = requests.post(
-                url=self.userconfiguration.ewsUrl,
+                url=self.userconfiguration.ews_url,
                 data=soap_request,
                 headers=self.SOAP_REQUEST_HEADER,
                 auth=(self.userconfiguration.credentials.email_address, self.userconfiguration.credentials.password),
                 verify=False
             )
-        except requests.exceptions.RequestException as e:
-            __LOGGER__.warning(
-                "An {err} occurred connecting to Exchange Web Services: {ep}".format(
-                    err=e.__class__.__name__,
-                    ep=self.userconfiguration.ewsUrl
-                ),
-                exc_info=True
-            )
-            raise SoapConnectionError('Error sending SOAP XML payload to {ep}'.format(ep=self.userconfiguration.ewsUrl))
+            response.raise_for_status()
+        except requests.exceptions.HTTPError as errh:
+            return "An Http Error occurred attempting to connect to {ep}:".format(ep=self.userconfiguration.ews_url) + repr(errh)
+        except requests.exceptions.ConnectionError as errc:
+            return "An Error Connecting to the API occurred attempting to connect to {ep}:".format(ep=self.userconfiguration.ews_url) + repr(errc)
+        except requests.exceptions.Timeout as errt:
+            return "A Timeout Error occurred attempting to connect to {ep}:".format(ep=self.userconfiguration.ews_url) + repr(errt)
+        except requests.exceptions.RequestException as err:
+            return "An Unknown Error occurred attempting to connect to {ep}:".format(ep=self.userconfiguration.ews_url) + repr(err)
 
         parsed_response = BeautifulSoup(response.content, 'xml')
-        if parsed_response.find('ResponseCode').string == 'NoError':
-            self.raw_soap = parsed_response
-            return
-        elif parsed_response.find('ResponseCode').string == 'ErrorAccessDenied':
+        try:
+            if parsed_response.find('ResponseCode').string == 'NoError':
+                return parsed_response
+        except:
+            if parsed_response.find('ErrorCode').string == 'NoError':
+                return parsed_response
+        if parsed_response.find('ResponseCode').string == 'ErrorAccessDenied':
             raise SoapAccessDeniedError('{}'.format(parsed_response.find('MessageText').string))
-
         raise SoapResponseHasError('Unable to parse response from {current}'.format(current=self.__class__.__name__))
