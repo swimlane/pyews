@@ -1,6 +1,3 @@
-import requests
-from bs4 import BeautifulSoup
-
 from .serviceendpoint import ServiceEndpoint
 from pyews.utils.exceptions import ObjectType, SoapResponseHasError, SoapAccessDeniedError
 
@@ -39,9 +36,6 @@ class GetInboxRules (ServiceEndpoint):
         self.hidden_rules = hidden_rules
         self.email_address = smtp_address
         super(GetInboxRules, self).__init__(userconfiguration)
-        self._soap_request = self.soap(self.email_address)
-        self.invoke(self._soap_request)
-        self.response = self.raw_soap
 
     def __process_rule_properties(self, item):
         if item:
@@ -50,31 +44,23 @@ class GetInboxRules (ServiceEndpoint):
                 if prop.name != 'Conditions' and prop.name != 'Actions':
                     if prop.name not in return_dict:
                         return_dict[prop.name] = prop.string
-            for condition in item.find('Conditions'):
-                if 'conditions' not in return_dict:
-                    return_dict['conditions'] = []
-                return_dict['conditions'].append({
-                    condition.name: condition.string
-                })
-            for action in item.find('Actions'):
-                if 'actions' not in return_dict:
-                    return_dict['actions'] = []
-                return_dict['actions'].append({
-                    action.name: action.string
-                })
+            if item.find('Conditions'):
+                for condition in item.find('Conditions'):
+                    if 'conditions' not in return_dict:
+                        return_dict['conditions'] = []
+                    return_dict['conditions'].append({
+                        condition.name: condition.string
+                    })
+            if item.find('Actions'):
+                for action in item.find('Actions'):
+                    if 'actions' not in return_dict:
+                        return_dict['actions'] = []
+                    return_dict['actions'].append({
+                        action.name: action.string
+                    })
             return return_dict
 
-    @property
-    def response(self):
-        '''GetInboxRules SOAP response
-        
-        Returns:
-            list: Returns a formatted list of dictionaries of a SOAP response
-        '''
-        return self._response
-
-    @response.setter
-    def response(self, value):
+    def __parse_response(self, value):
         '''Creates and sets a response object
         
         Args:
@@ -87,10 +73,14 @@ class GetInboxRules (ServiceEndpoint):
                     return_list.append(self.__process_rule_properties(item))
         if self.hidden_rules:
             from .findhiddeninboxrules import FindHiddenInboxRules
-            return_list.append(FindHiddenInboxRules(self.userconfiguration).response)
-        self._response = return_list
+            return_list.append(FindHiddenInboxRules(self.userconfiguration).run())
+        return return_list
 
-    def soap(self, email_address):
+    def run(self):
+        self.raw_xml = self.invoke(self.soap())
+        return self.__parse_response(self.raw_xml)
+
+    def soap(self):
         '''Creates the SOAP XML message body
 
         Args:
@@ -119,4 +109,4 @@ class GetInboxRules (ServiceEndpoint):
     </m:GetInboxRules>
   </soap:Body>
 </soap:Envelope>
-        '''.format(version=self.userconfiguration.exchangeVersion, header=impersonation_header, email=email_address)
+        '''.format(version=self.userconfiguration.exchangeVersion, header=impersonation_header, email=self.email_address)
