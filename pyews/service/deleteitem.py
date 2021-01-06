@@ -54,12 +54,9 @@ class DeleteItem(ServiceEndpoint):
 
     DELETE_TYPES = ['HardDelete', 'SoftDelete', 'MoveToDeletedItems']
 
-    def __init__(self, messageId, userconfiguration, delete_type=DELETE_TYPES[2]):
-
-        self.messageId = messageId
-
+    def __init__(self, message_id, userconfiguration, delete_type=DELETE_TYPES[2]):
+        self.message_id = message_id
         super(DeleteItem, self).__init__(userconfiguration)
-
         if delete_type in self.DELETE_TYPES:
             self.delete_type = delete_type
         else:
