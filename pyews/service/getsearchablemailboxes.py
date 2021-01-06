@@ -9,13 +9,13 @@ from pyews.utils.exceptions import ObjectType, SoapResponseHasError, SoapAccessD
 
 class GetSearchableMailboxes(ServiceEndpoint):
     '''Child class of ServiceEndpoint that identifies all searchable mailboxes based on the provided UserConfiguration object's permissions
-    
+
     Example:
         To use any service class you must provide a :doc:`../configuration/userconfiguration` object first.
         Like all service classes, you can access formatted properties from the EWS endpoint using the `response` property.
 
         You can acquire 
-            
+
         .. code-block:: python
            from pyews import UserConfiguration
            from pyews import GetSearchableMailboxes
@@ -37,7 +37,6 @@ class GetSearchableMailboxes(ServiceEndpoint):
                id_list.append(id['ReferenceId'])
            searchResults = SearchMailboxes('subject:"Phishing Email Subject"', userConfig, id_list)
 
-
     Args:
         userconfiguration (UserConfiguration): A :doc:`../configuration/userconfiguration` object created using the :doc:`../configuration/userconfiguration` class
     Raises:
@@ -45,26 +44,10 @@ class GetSearchableMailboxes(ServiceEndpoint):
         SoapResponseHasError: An error occurred when parsing the SOAP response
         ObjectType: An incorrect object type has been used
     '''
-
     def __init__(self, userconfiguration):
-    
         super(GetSearchableMailboxes, self).__init__(userconfiguration)
 
-        self._soap_request = self.soap()
-        self.invoke(self._soap_request)
-        self.response = self.raw_soap
-
-    @property
-    def response(self):
-        '''GetSearchableMailboxes SOAP response
-        
-        Returns:
-            list: Returns a formatted list of one or more searchable mailboxes objects
-        '''
-        return self._response
-
-    @response.setter
-    def response(self, value):
+    def __parse_response(self, value):
         '''Creates and sets a response object
 
         Args:
@@ -74,15 +57,19 @@ class GetSearchableMailboxes(ServiceEndpoint):
         if value.find('ResponseCode').string == 'NoError':
             for item in value.find_all('SearchableMailbox'):
                 return_list.append({
-                    'ReferenceId': item.ReferenceId.string,
-                    'PrimarySmtpAddress': item.PrimarySmtpAddress.string,
-                    'DisplayName': item.DisplayName.string,
-                    'IsMembershipGroup': item.IsMembershipGroup.string,
-                    'IsExternalMailbox': item.IsExternalMailbox.string,
-                    'ExternalEmailAddress': item.ExternalEmailAddress.string,
-                    'Guid': item.Guid.string
+                    'reference_id': item.ReferenceId.string,
+                    'primary_smtp_address': item.PrimarySmtpAddress.string,
+                    'display_name': item.DisplayName.string,
+                    'is_membership_group': item.IsMembershipGroup.string,
+                    'is_external_mailbox': item.IsExternalMailbox.string,
+                    'external_email_address': item.ExternalEmailAddress.string,
+                    'guid': item.Guid.string
                 })
-        self._response = return_list
+        return return_list
+
+    def run(self):
+        self.raw_xml = self.invoke(self.soap())
+        return self.__parse_response(self.raw_xml)
 
     def soap(self):
         '''Creates the SOAP XML message body
@@ -108,4 +95,6 @@ class GetSearchableMailboxes(ServiceEndpoint):
          <m:ExpandGroupMembership>true</m:ExpandGroupMembership>
       </m:GetSearchableMailboxes>
    </soap:Body>
-</soap:Envelope>'''.format(version=self.userconfiguration.exchangeVersion, header=impersonation_header)
+</soap:Envelope>'''.format(
+    version=self.userconfiguration.exchange_version, 
+    header=impersonation_header)
