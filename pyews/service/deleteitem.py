@@ -62,24 +62,9 @@ class DeleteItem(ServiceEndpoint):
         else:
             raise DeleteTypeError('You must provide one of the following delete types: {}'.format(self.DELETE_TYPES))
 
-        self._soap_request = self.soap(self.messageId)
-        self.invoke(self._soap_request)
-        self.response = self.raw_soap
-
-
-    @property
-    def response(self):
-        '''DeleteItem SOAP response dictionary
-        
-        Returns:
-            list: Returns a formatted dictionary of a SOAP response
-        '''
-        return self._response
-
-    @response.setter
-    def response(self, value):
+    def __parse_response(self, value):
         '''Creates and sets a response object
-        
+
         Args:
             value (str): The raw response from a SOAP request
         '''
@@ -95,7 +80,7 @@ class DeleteItem(ServiceEndpoint):
             return_list.append({
                 'MessageText': 'Successfull'
             })
-        self._response = return_list      
+        return return_list
 
     def soap(self, item):
         '''Creates the SOAP XML message body
