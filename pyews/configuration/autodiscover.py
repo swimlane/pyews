@@ -2,11 +2,10 @@ import requests, logging
 from requests.adapters import HTTPAdapter
 from requests.packages.urllib3.util.retry import Retry
 
-from bs4 import BeautifulSoup
-
-from pyews.configuration.endpoint import Endpoint
-from pyews.utils.exchangeversion import ExchangeVersion
-from pyews.utils.exceptions import IncorrectParameters, ExchangeVersionError, SoapResponseHasError, SoapResponseIsNoneError, SoapConnectionRefused, SoapConnectionError
+from .endpoint import Endpoint
+from ..service.getusersettings import GetUserSettings
+from ..utils.exchangeversion import ExchangeVersion
+from ..utils.exceptions import IncorrectParameters, ExchangeVersionError, SoapResponseHasError, SoapResponseIsNoneError, SoapConnectionRefused, SoapConnectionError
 
 __LOGGER__ = logging.getLogger(__name__)
 
