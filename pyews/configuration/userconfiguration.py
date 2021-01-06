@@ -85,23 +85,30 @@ class UserConfiguration:
     Raises:
         IncorrectParameters: Provided an incorrect configuration of parameters to this class
     '''
-    
-    def __init__(self, username, password, exchangeVersion=None, ewsUrl= None, autodiscover=True, impersonation=None):
-            
-        self.credentials = username, password
-        self.exchangeVersion = exchangeVersion
-        self.ewsUrl = ewsUrl
-        self.impersonation = impersonation
 
-        if autodiscover:
-            self.autodiscover = autodiscover
+    __config_properties = {}
+
+    def __init__(self, username, password, exchange_version=None, ews_url= None, autodiscover=True, impersonation=None):
+        self.credentials = Credentials(username, password)
+        if not exchange_version:
+            self.exchange_version = ExchangeVersion.EXCHANGE_VERSIONS
         else:
-            if ewsUrl:
-                self.raw_soap = ResolveNames(self).response
-                self.properties = self.raw_soap
+            self.exchange_version = exchange_version if not isinstance(exchange_version, list) else [exchange_version]
+        self.ews_url = ews_url
+        self.impersonation = impersonation
+        self.autodiscover = autodiscover
+
+        if self.autodiscover:
+            self.__config_properties = Autodiscover(self).invoke()
+            if self.__config_properties.get('ExternalEwsUrl'):
+                self.ews_url = self.__config_properties['ExternalEwsUrl']
+        else:
+            if self.ews_url:
+                    self.exchange_version = 'Exchange2010'
+                    self.__config_properties = ResolveNames(self).run()
             else:
-                raise IncorrectParameters('If you are not using Autodiscover then you must provide a ewsUrl and exchangeVersion.')
-        
+                raise IncorrectParameters('If you are not using Autodiscover then you must provide a ews_url and exchange_version.')
+
     @property
     def impersonation(self):
         return self._impersonation
