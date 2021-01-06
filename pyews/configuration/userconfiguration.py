@@ -120,10 +120,10 @@ class UserConfiguration:
         else:
             self._impersonation = None
 
-    @property
-    def credentials(self):
-        '''Returns a Credentials object
-        
+    def get(self):
+        self.__config_properties.update(self.__parse_properties())
+        return self.__config_properties
+
         Returns:
             Credentials: A Credentials object made of your passed in username and password
         '''
