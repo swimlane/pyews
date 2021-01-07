@@ -1,7 +1,7 @@
 from pyews.utils.logger import setup_logging
 setup_logging()
 
-
+from .core import Core
 from .configuration.userconfiguration import UserConfiguration
 from .configuration.endpoint import Endpoint
 from .configuration.autodiscover import Autodiscover
