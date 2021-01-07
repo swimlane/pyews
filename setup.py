@@ -18,9 +18,4 @@ setup(
     author='Swimlane',
     author_email='info@swimlane.com',
     python_requires='>=2.6, !=3.0.*, !=3.1.*, !=3.2.*, <4',
-    entry_points={
-          'console_scripts': [
-              'pyews = pyews.__main__:main'
-          ]
-    },
 )
