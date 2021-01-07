@@ -3,3 +3,4 @@ beautifulsoup4
 lxml
 pyyaml
 xmltodict==0.12.0
+m2r==0.2.1
