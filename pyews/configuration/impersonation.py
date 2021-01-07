@@ -1,23 +1,26 @@
 
 
 class Impersonation:
-    '''The Impersonation class is used when you want to impersonate a user.  You must access rights to impersonate a specific user within your Exchange environment.
+    '''The Impersonation class is used when you want to impersonate a user.
+    
+    You must access rights to impersonate a specific user within your Exchange environment.
     
     Example:
-        Below are examples of the data inputs expected for all parameters.
-        
-        .. code-block:: python
 
-           Impersonation(principalname='first.last@company.com')
-           Impersonation(primarysmtpaddress='first.last@company.com')
-           Impersonation(smtpaddress='first.last@company.com')
+    Below are examples of the data inputs expected for all parameters.
+        
+    ```python
+    Impersonation(principalname='first.last@company.com')
+    Impersonation(primarysmtpaddress='first.last@company.com')
+    Impersonation(smtpaddress='first.last@company.com')
+    ```
 
     Args:
         principalname (str, optional): The PrincipalName of the account you want to impersonate
         sid (str, optional): The SID of the account you want to impersonate
         primarysmtpaddress (str, optional): The PrimarySmtpAddress of the account you want to impersonate
         smtpaddress (bool, optional): The SmtpAddress of the account you want to impersonate
-    
+
     Raises:
         AttributeError: This will raise when you call this class but do not provide at least 1 parameter
     '''

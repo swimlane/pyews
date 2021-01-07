@@ -1,48 +1,39 @@
-import requests
-from bs4 import BeautifulSoup
-
-from .serviceendpoint import ServiceEndpoint
-from pyews.configuration.autodiscover import Autodiscover
-from pyews.utils.exchangeversion import ExchangeVersion
-from pyews.utils.exceptions import ObjectType, SoapResponseHasError, SoapAccessDeniedError
+from ..core import Core
 
 
-class GetSearchableMailboxes(ServiceEndpoint):
-    '''Child class of ServiceEndpoint that identifies all searchable mailboxes based on the provided UserConfiguration object's permissions
+class GetSearchableMailboxes(Core):
+    '''Identifies all searchable mailboxes based on the provided UserConfiguration object's permissions
 
     Example:
-        To use any service class you must provide a :doc:`../configuration/userconfiguration` object first.
-        Like all service classes, you can access formatted properties from the EWS endpoint using the `response` property.
+        
+    To use any service class you must provide a UserConfiguration object first.
 
-        You can acquire 
+    You can acquire
 
-        .. code-block:: python
-           from pyews import UserConfiguration
-           from pyews import GetSearchableMailboxes
+    ```python
+    from pyews import UserConfiguration
+    from pyews import GetSearchableMailboxes
 
-           userConfig = UserConfiguration(
-               'first.last@company.com',
-               'mypassword123'
-           )
+    userconfig = UserConfiguration(
+        'first.last@company.com',
+        'mypassword123'
+    )
 
-           searchableMailboxes = GetSearchableMailboxes(userconfig)
+    searchable_mailboxes = GetSearchableMailboxes(userconfig).run()
+    ```
 
-        If you want to use a property from this object with another class then you can iterate through the list of of mailbox properties.
-        For example, if used in conjunction with the :doc:`searchmailboxes` you first need to create a list of mailbox ReferenceIds.
+    If you want to use a property from this object with another class then you can iterate through the list of of mailbox properties.
+    For example, if used in conjunction with the :doc:`searchmailboxes` you first need to create a list of mailbox reference_ids.
 
-        .. code-block:: python
-           
-           id_list = []
-           for id in searchableMailboxes.response:
-               id_list.append(id['ReferenceId'])
-           searchResults = SearchMailboxes('subject:"Phishing Email Subject"', userConfig, id_list)
+    ```python
+    id_list = []
+    for id in searchable_mailboxes.run():
+        id_list.append(id.get('reference_id'))
+    searchResults = SearchMailboxes(userconfig).run('subject:"Phishing Email Subject"', id_list)
+    ```
 
     Args:
-        userconfiguration (UserConfiguration): A :doc:`../configuration/userconfiguration` object created using the :doc:`../configuration/userconfiguration` class
-    Raises:
-        SoapAccessDeniedError: Access is denied when attempting to use Exchange Web Services endpoint
-        SoapResponseHasError: An error occurred when parsing the SOAP response
-        ObjectType: An incorrect object type has been used
+        userconfiguration (UserConfiguration): A UserConfiguration object created using the UserConfiguration class
     '''
     def __init__(self, userconfiguration):
         super(GetSearchableMailboxes, self).__init__(userconfiguration)

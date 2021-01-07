@@ -1,39 +1,13 @@
-import requests
-from bs4 import BeautifulSoup
-
-from .serviceendpoint import ServiceEndpoint
-from pyews.utils.exceptions import ObjectType, SoapResponseHasError, SoapAccessDeniedError
+from ..core import Core
 
 
-class FindHiddenInboxRules (ServiceEndpoint):
-    '''Child class of doc:`serviceendpoint` that retrieves hidden inbox (mailbox) rules for a users email address specificed by impersonation headers.
-    
-    Examples:
-        To use any service class you must provide a :doc:`../configuration/userconfiguration` object first.
-        Like all service classes, you can access formatted properties from the EWS endpoint using the `response` property.
-        
-        If you want to retrieve the inbox rules for a specific email address you must provide it when creating a GetInboxRules object.
-            
-        .. code-block:: python
-           from pyews import UserConfiguration
-           from pyews import GetInboxRules
-           
-           userConfig = UserConfiguration(
-               'first.last@company.com',
-               'mypassword123'
-           )
-
-           inboxRules = GetInboxRules('first.last@company.com', userConfig, hidden_rules=True)
+class FindHiddenInboxRules(Core):
+    '''Retrieves hidden inbox (mailbox) rules for a users email address specificed by impersonation headers.
 
     Args:
-        userconfiguration (UserConfiguration): A :doc:`../configuration/userconfiguration` object created using the UserConfiguration class
-
-    Raises:
-        SoapAccessDeniedError: Access is denied when attempting to use Exchange Web Services endpoint
-        SoapResponseHasError: An error occurred when parsing the SOAP response
-        ObjectType: An incorrect object type has been used
+        userconfiguration (UserConfiguration): A UserConfiguration object created using the UserConfiguration class
     '''
-    
+
     def __init__(self, userconfiguration):
         super(FindHiddenInboxRules, self).__init__(userconfiguration)
 

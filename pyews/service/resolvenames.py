@@ -1,34 +1,31 @@
-from .serviceendpoint import ServiceEndpoint
-from ..utils.exceptions import ObjectType, SoapResponseHasError, SoapAccessDeniedError
+from ..core import Core
 from ..utils.exchangeversion import ExchangeVersion
 
 
-class ResolveNames(ServiceEndpoint):
-    '''Child class of :doc:`serviceendpoint` that is used to resolve names based on the provided :doc:`../configuration/userconfiguration` object.  This class is used as an alternative to :doc:`../configuration/autodiscover`
-        since ResolveNames endpoint is a common endpoint across all versions of Microsoft Exchange & Office 365.
+class ResolveNames(Core):
+    '''Resolve names based on the provided UserConfiguration object.
+    
+    This class is used as an alternative to Autodiscover since ResolveNames endpoint
+    is a common endpoint across all versions of Microsoft Exchange & Office 365.
         
-        Examples:
-            To use any service class you must provide a :doc:`../configuration/userconfiguration` object first.
-            Like all service classes, you can access formatted properties from the EWS endpoint using the `response` property.
-            
-            By passing in a :doc:`../configuration/userconfiguration` object we can 
-                
-            .. code-block:: python
+    Examples:
+    
+    To use any service class you must provide a UserConfiguration object first.
+    Like all service classes, you can access formatted properties from the EWS endpoint using the `response` property.
+    
+    By passing in a UserConfiguration object we can 
+        
+    ```python
+    userConfig = UserConfiguration(
+        'first.last@company.com',
+        'mypassword123'
+    )
+    print(ResolveNames(userConfig))
+    ```
 
-               userConfig = UserConfiguration(
-                   'first.last@company.com',
-                   'mypassword123'
-               )
-        
-               messageId = 'AAMkAGZjOTlkOWExLTM2MDEtNGI3MS04ZDJiLTllNzgwNDQxMThmMABGAAAAAABdQG8UG7qjTKf0wCVbqLyMBwC6DuFzUH4qRojG/OZVoLCfAAAAAAEMAAC6DuFzUH4qRojG/OZVoLCfAAAu4Y9UAAA='
-               deleteItem = DeleteItem(messageId, userConfig)
-
-        Args:
-            userconfiguration (UserConfiguration): A :doc:`../configuration/userconfiguration` object created using the :doc:`../configuration/userconfiguration` class
-        
-        Raises:
-            ObjectType: An incorrect object type has been used
-        '''
+    Args:
+        userconfiguration (UserConfiguration): A UserConfiguration object created using the UserConfiguration class
+    '''
     def __init__(self, userconfiguration):
         super(ResolveNames, self).__init__(userconfiguration)
 
@@ -50,14 +47,14 @@ class ResolveNames(ServiceEndpoint):
             for item in value.find('ResolutionSet'):
                 if item.find('Mailbox'):
                     for i in item.find('Mailbox'):
-                        return_dict[i.name] = i.string
+                        return_dict[self.camel_to_snake(i.name)] = i.string
                 if item.find('Contact'):
                     for i in item.find('Contact').descendants:
                         if i.name == 'Entry' and i.string:
-                            return_dict[i.name] = i.string
+                            return_dict[self.camel_to_snake(i.name)] = i.string
                         else:
                             if i.name and i.string:
-                                return_dict[i.name] = i.string
+                                return_dict[self.camel_to_snake(i.name)] = i.string
         return return_dict
 
     def run(self):

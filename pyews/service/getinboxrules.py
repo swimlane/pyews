@@ -1,40 +1,34 @@
-from .serviceendpoint import ServiceEndpoint
-from pyews.utils.exceptions import ObjectType, SoapResponseHasError, SoapAccessDeniedError
+from ..core import Core
 
 
-class GetInboxRules (ServiceEndpoint):
-    '''Child class of doc:`serviceendpoint` that retrieves inbox (mailbox) rules for a specified email address.
+class GetInboxRules(Core):
+    '''Retrieves inbox (mailbox) rules for a specified email address.
     
     Examples:
-        To use any service class you must provide a :doc:`../configuration/userconfiguration` object first.
-        Like all service classes, you can access formatted properties from the EWS endpoint using the `response` property.
         
-        If you want to retrieve the inbox rules for a specific email address you must provide it when creating a GetInboxRules object.
-            
-        .. code-block:: python
-           from pyews import UserConfiguration
-           from pyews import GetInboxRules
-           
-           userConfig = UserConfiguration(
-               'first.last@company.com',
-               'mypassword123'
-           )
+    To use any service class you must provide a UserConfiguration object first.
+    Like all service classes, you can access formatted properties from the EWS endpoint using the `response` property.
+    
+    If you want to retrieve the inbox rules for a specific email address you must provide it when creating a GetInboxRules object.
+        
+    ```python
+    from pyews import UserConfiguration
+    from pyews import GetInboxRules
+    
+    userconfig = UserConfiguration(
+        'first.last@company.com',
+        'mypassword123'
+    )
 
-           inboxRules = GetInboxRules('first.last@company.com', userConfig)
+    inboxRules = GetInboxRules(userconfig).run('first.last@company.com')
+    ```
 
     Args:
         smtp_address (str): The email address you want to get inbox rules for
-        userconfiguration (UserConfiguration): A :doc:`../configuration/userconfiguration` object created using the UserConfiguration class
-
-    Raises:
-        SoapAccessDeniedError: Access is denied when attempting to use Exchange Web Services endpoint
-        SoapResponseHasError: An error occurred when parsing the SOAP response
-        ObjectType: An incorrect object type has been used
+        userconfiguration (UserConfiguration): A UserConfiguration object created using the UserConfiguration class
     '''
     
-    def __init__(self, smtp_address, userconfiguration, hidden_rules=False):
-        self.hidden_rules = hidden_rules
-        self.email_address = smtp_address
+    def __init__(self, userconfiguration):
         super(GetInboxRules, self).__init__(userconfiguration)
 
     def __process_rule_properties(self, item):
@@ -76,7 +70,9 @@ class GetInboxRules (ServiceEndpoint):
             return_list.append(FindHiddenInboxRules(self.userconfiguration).run())
         return return_list
 
-    def run(self):
+    def run(self, smtp_address, hidden_rules=False):
+        self.hidden_rules = hidden_rules
+        self.email_address = smtp_address
         self.raw_xml = self.invoke(self.soap())
         return self.__parse_response(self.raw_xml)
 
@@ -109,4 +105,8 @@ class GetInboxRules (ServiceEndpoint):
     </m:GetInboxRules>
   </soap:Body>
 </soap:Envelope>
-        '''.format(version=self.userconfiguration.exchangeVersion, header=impersonation_header, email=self.email_address)
+        '''.format(
+            version=self.userconfiguration.exchangeVersion, 
+            header=impersonation_header, 
+            email=self.email_address
+        )

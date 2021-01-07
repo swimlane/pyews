@@ -1,45 +1,42 @@
-import requests, re
-from bs4 import BeautifulSoup
-
-from .serviceendpoint import ServiceEndpoint
-from pyews.utils.exchangeversion import ExchangeVersion
-from pyews.utils.exceptions import ObjectType, DeleteTypeError, SoapResponseHasError, SoapAccessDeniedError
+from ..core import Core
+from ..utils.exchangeversion import ExchangeVersion
+from ..utils.exceptions import DeleteTypeError
 
 
-class DeleteItem(ServiceEndpoint):
-    '''Child class of :doc:`serviceendpoint` which deletes items (typically email messages) from a users mailboxes.
+class DeleteItem(Core):
+    '''Deletes items (typically email messages) from a users mailboxes.
 
     Examples:
-        To use any service class you must provide a :doc:`../configuration/userconfiguration` object first.
-        Like all service classes, you can access formatted properties from the EWS endpoint using the `response` property.
+        
+    To use any service class you must provide a UserConfiguration object first.
+    Like all service classes, you can access formatted properties from the EWS endpoint using the `response` property.
 
-        If you want to move a single message to the `Deleted Items` folder then provide a string value of the message ID.  The default `delete_type` is to move a message to the `Deleted Items` folder.
+    If you want to move a single message to the `Deleted Items` folder then provide a string value of the message ID.
+    The default `delete_type` is to move a message to the `Deleted Items` folder.
 
-        .. code-block:: python
+    ```python
+    userconfig = UserConfiguration(
+        'first.last@company.com',
+        'mypassword123'
+    )
+    messageId = 'AAMkAGZjOTlkOWExLTM2MDEtNGI3MS04ZDJiLTllNzgwNDQxMThmMABGAAAAAABdQG8UG7qjTKf0wCVbqLyMBwC6DuFzUH4qRojG/OZVoLCfAAAAAAEMAAC6DuFzUH4qRojG/OZVoLCfAAAu4Y9UAAA='
+    deleteItem = DeleteItem(userconfig).run(message_id)
+    ```
 
-           userConfig = UserConfiguration(
-               'first.last@company.com',
-               'mypassword123'
-           )
+    If you want to HardDelete a single message then provide a string value of the message ID and specify the `delete_type` as `HardDelete`:
 
-           messageId = 'AAMkAGZjOTlkOWExLTM2MDEtNGI3MS04ZDJiLTllNzgwNDQxMThmMABGAAAAAABdQG8UG7qjTKf0wCVbqLyMBwC6DuFzUH4qRojG/OZVoLCfAAAAAAEMAAC6DuFzUH4qRojG/OZVoLCfAAAu4Y9UAAA='
+    ```python
+    from pyews import UserConfiguration
+    from pyews import DeleteItem
 
-           deleteItem = DeleteItem(messageId, userConfig)
+    userconfig = UserConfiguration(
+        'first.last@company.com',
+        'mypassword123'
+    )
 
-        If you want to HardDelete a single message then provide a string value of the message ID and specify the `delete_type` as `HardDelete`:
-
-        .. code-block:: python
-           from pyews import UserConfiguration
-           from pyews import DeleteItem
-
-           userConfig = UserConfiguration(
-               'first.last@company.com',
-               'mypassword123'
-           )
-
-           messageId = 'AAMkAGZjOTlkOWExLTM2MDEtNGI3MS04ZDJiLTllNzgwNDQxMThmMABGAAAAAABdQG8UG7qjTKf0wCVbqLyMBwC6DuFzUH4qRojG/OZVoLCfAAAAAAEMAAC6DuFzUH4qRojG/OZVoLCfAAAu4Y9UAAA='
-
-           deleteItem = DeleteItem(messageId, userConfig, delete_type='HardDelete')
+    messageId = 'AAMkAGZjOTlkOWExLTM2MDEtNGI3MS04ZDJiLTllNzgwNDQxMThmMABGAAAAAABdQG8UG7qjTKf0wCVbqLyMBwC6DuFzUH4qRojG/OZVoLCfAAAAAAEMAAC6DuFzUH4qRojG/OZVoLCfAAAu4Y9UAAA='
+    deleteItem = DeleteItem(userConfig).run(message_id, delete_type='HardDelete')
+    ```
 
     Args:
         messageId (list or str): An email MessageId to delete
@@ -54,13 +51,8 @@ class DeleteItem(ServiceEndpoint):
 
     DELETE_TYPES = ['HardDelete', 'SoftDelete', 'MoveToDeletedItems']
 
-    def __init__(self, message_id, userconfiguration, delete_type=DELETE_TYPES[2]):
-        self.message_id = message_id
+    def __init__(self, userconfiguration):
         super(DeleteItem, self).__init__(userconfiguration)
-        if delete_type in self.DELETE_TYPES:
-            self.delete_type = delete_type
-        else:
-            raise DeleteTypeError('You must provide one of the following delete types: {}'.format(self.DELETE_TYPES))
 
     def __parse_response(self, value):
         '''Creates and sets a response object
@@ -82,8 +74,12 @@ class DeleteItem(ServiceEndpoint):
             })
         return return_list
 
-    def run(self):
-        self.raw_xml = self.invoke(self.soap(self.message_id))
+    def run(self, message_id, delete_type=DELETE_TYPES[2]):
+        if delete_type in self.DELETE_TYPES:
+            self.delete_type = delete_type
+        else:
+            raise DeleteTypeError('You must provide one of the following delete types: {}'.format(self.DELETE_TYPES))
+        self.raw_xml = self.invoke(self.soap(message_id))
         return self.__parse_response(self.raw_xml)
 
     def soap(self, item):
@@ -130,7 +126,7 @@ class DeleteItem(ServiceEndpoint):
             str: Returns the ItemId SOAP XML element(s)
         '''
         item_soap_string = ''
-        if (isinstance(item, list)):
+        if isinstance(item, list):
             for i in item:
                 item_soap_string += '''<t:ItemId Id="{}"/>'''.format(i)
         else:

@@ -1,18 +1,16 @@
 import logging
-import requests
-
+from ..core import Core
 from .credentials import Credentials
 from .autodiscover import Autodiscover
 from .impersonation import Impersonation
-
 from ..service.resolvenames import ResolveNames
-from ..utils.exceptions import ObjectType, IncorrectParameters, ExchangeVersionError, UserConfigurationError, CredentialsError
+from ..utils.exceptions import IncorrectParameters
 from ..utils.exchangeversion import ExchangeVersion
 
 __LOGGER__ = logging.getLogger(__name__)
 
 
-class UserConfiguration:
+class UserConfiguration(Core):
     '''UserConfiguration is the main class of pyews.
 
     It is used by all other ServiceEndpoint parent and child classes.  
@@ -20,54 +18,53 @@ class UserConfiguration:
 
     Examples:
 
-        The UserConfiguration class is the main class used by all services, including the parent class of services called ServiceEndpoint. 
+    The UserConfiguration class is the main class used by all services, including the parent class of services called ServiceEndpoint. 
 
-        A UserConfiguration object contains detailed information about how to communicate to Exchange Web Services, as well as additional properties
+    A UserConfiguration object contains detailed information about how to communicate to Exchange Web Services, as well as additional properties
 
-        The traditional UserConfiguration object can be created by just passing in a username and password.  This will attempt to connect using Autodiscover and will attempt every version of Exchange.
+    The traditional UserConfiguration object can be created by just passing in a username and password.  This will attempt to connect using Autodiscover and will attempt every version of Exchange.
 
-            .. code-block:: python
+    ```python
+    userConfig = UserConfiguration(
+        'first.last@company.com',
+        'mypassword123'
+    )
+    ```
 
-               userConfig = UserConfiguration(
-                   'first.last@company.com',
-                   'mypassword123'
-               )
+    If you the know the Exchange version you want to communicate with you can provide this information:
 
-        If you the know the Exchange version you want to communicate with you can provide this information:
+    ```python
+    userConfig = UserConfiguration(
+        'first.last@company.com',
+        'mypassword123',
+        exchangeVersion='Office365'
+    )
+    ```
 
-            .. code-block:: python
+    If you do not wish to use Autodiscover then you can tell UserConfiguration to not use it by setting autodiscover to False and provide the ewsUrl instead
 
-               userConfig = UserConfiguration(
-                   'first.last@company.com',
-                   'mypassword123',
-                   exchangeVersion='Office365'
-               )
+    ```python
+    userConfig = UserConfiguration(
+        'first.last@company.com',
+        'mypassword123',
+        autodiscover=False,
+        ewsUrl='https://outlook.office365.com/EWS/Exchange.asmx'
+    )
+    ```
 
-        If you do not wish to use Autodiscover then you can tell UserConfiguration to not use it by setting autodiscover to False and provide the ewsUrl instead
+    If you would like to use impersonation, you first need to create an Impersonation object and pass that into the UserConfiguration class when creating a user configuration object.
 
-            .. code-block:: python
+    ```python
+    impersonation = Impersonation(primarysmtpaddress='first.last@company.com')
 
-               userConfig = UserConfiguration(
-                   'first.last@company.com',
-                   'mypassword123',
-                   autodiscover=False,
-                   ewsUrl='https://outlook.office365.com/EWS/Exchange.asmx'
-               )
-
-        If you would like to use impersonation, you first need to create an Impersonation object and pass that into the UserConfiguration class when creating a user configuration object.
-
-            .. code-block:: python
-
-               impersonation = Impersonation(primarysmtpaddress='first.last@company.com')
-
-               userConfig = UserConfiguration(
-                   'first.last@company.com',
-                   'mypassword123',
-                   autodiscover=False,
-                   ewsUrl='https://outlook.office365.com/EWS/Exchange.asmx',
-                   impersonation=impersonation
-               )
-
+    userConfig = UserConfiguration(
+        'first.last@company.com',
+        'mypassword123',
+        autodiscover=False,
+        ewsUrl='https://outlook.office365.com/EWS/Exchange.asmx',
+        impersonation=impersonation
+    )
+    ```
     Args:
         username (str): An email address or username that you use to authenticate to Exchange Web Services
         password (str): The password that you use to authenticate to Exchange Web Services
@@ -89,7 +86,9 @@ class UserConfiguration:
     __config_properties = {}
 
     def __init__(self, username, password, exchange_version=None, ews_url= None, autodiscover=True, impersonation=None):
-        self.credentials = Credentials(username, password)
+        self.username = username
+        self.password = password
+        self.credentials = Credentials(self.username, self.password)
         if not exchange_version:
             self.exchange_version = ExchangeVersion.EXCHANGE_VERSIONS
         else:
@@ -99,9 +98,9 @@ class UserConfiguration:
         self.autodiscover = autodiscover
 
         if self.autodiscover:
-            self.__config_properties = Autodiscover(self).invoke()
-            if self.__config_properties.get('ExternalEwsUrl'):
-                self.ews_url = self.__config_properties['ExternalEwsUrl']
+            self.__config_properties = Autodiscover(self).run()
+            if self.__config_properties.get('external_ews_url'):
+                self.ews_url = self.__config_properties['external_ews_url']
         else:
             if self.ews_url:
                     self.exchange_version = 'Exchange2010'
@@ -130,6 +129,18 @@ class UserConfiguration:
         for item in temp:
             if not item.startswith('_'):
                 return_dict.update({
-                    item: temp[item]
+                    self.camel_to_snake(item): temp[item]
+                })
+        if self.__config_properties:
+            for key,val in self.__config_properties.items():
+                return_value = None
+                if ', ' in val:
+                    return_value = []
+                    for v in val.split(','):
+                        return_value.append(v)
+                else:
+                    return_value = val
+                return_dict.update({
+                    self.camel_to_snake(key): val
                 })
         return return_dict
