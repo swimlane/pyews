@@ -2,3 +2,4 @@ requests
 beautifulsoup4
 lxml
 pyyaml
+xmltodict==0.12.0
