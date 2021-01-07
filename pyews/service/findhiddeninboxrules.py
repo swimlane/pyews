@@ -1,44 +1,15 @@
-import requests
-from bs4 import BeautifulSoup
-
-from .serviceendpoint import ServiceEndpoint
-from pyews.utils.exceptions import ObjectType, SoapResponseHasError, SoapAccessDeniedError
+from ..core import Core
 
 
-class FindHiddenInboxRules (ServiceEndpoint):
-    '''Child class of doc:`serviceendpoint` that retrieves hidden inbox (mailbox) rules for a users email address specificed by impersonation headers.
-    
-    Examples:
-        To use any service class you must provide a :doc:`../configuration/userconfiguration` object first.
-        Like all service classes, you can access formatted properties from the EWS endpoint using the `response` property.
-        
-        If you want to retrieve the inbox rules for a specific email address you must provide it when creating a GetInboxRules object.
-            
-        .. code-block:: python
-           from pyews import UserConfiguration
-           from pyews import GetInboxRules
-           
-           userConfig = UserConfiguration(
-               'first.last@company.com',
-               'mypassword123'
-           )
-
-           inboxRules = GetInboxRules('first.last@company.com', userConfig, hidden_rules=True)
+class FindHiddenInboxRules(Core):
+    '''Retrieves hidden inbox (mailbox) rules for a users email address specificed by impersonation headers.
 
     Args:
-        userconfiguration (UserConfiguration): A :doc:`../configuration/userconfiguration` object created using the UserConfiguration class
-
-    Raises:
-        SoapAccessDeniedError: Access is denied when attempting to use Exchange Web Services endpoint
-        SoapResponseHasError: An error occurred when parsing the SOAP response
-        ObjectType: An incorrect object type has been used
+        userconfiguration (UserConfiguration): A UserConfiguration object created using the UserConfiguration class
     '''
-    
+
     def __init__(self, userconfiguration):
         super(FindHiddenInboxRules, self).__init__(userconfiguration)
-        self._soap_request = self.soap()
-        self.invoke(self._soap_request)
-        self.response = self.raw_soap
 
     def __process_rule_properties(self, item):
         if item:
@@ -61,17 +32,7 @@ class FindHiddenInboxRules (ServiceEndpoint):
                 })
             return return_dict
 
-    @property
-    def response(self):
-        '''GetInboxRules SOAP response
-        
-        Returns:
-            list: Returns a formatted list of dictionaries of a SOAP response
-        '''
-        return self._response
-
-    @response.setter
-    def response(self, value):
+    def __parse_response(self, value):
         '''Creates and sets a response object
         
         Args:
@@ -82,7 +43,11 @@ class FindHiddenInboxRules (ServiceEndpoint):
             for item in value.find('InboxRules'):
                 if item.name == 'Rule' and item:
                     return_list.append(self.__process_rule_properties(item))
-            self._response = return_list
+        return return_list
+
+    def run(self):
+        self.raw_xml = self.invoke(self.soap())
+        return self.__parse_response(self.raw_xml)
 
     def soap(self):
         '''Creates the SOAP XML message body

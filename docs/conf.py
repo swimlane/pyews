@@ -28,13 +28,13 @@ import pyews
 #from pyews.utils import (exceptions, exchangeversion, logger)
 
 project = 'py-ews'
-copyright = '2019, Swimlane'
+copyright = '2020, Swimlane'
 author = 'Swimlane'
 
 # The short X.Y version
-version = '1.0.1'
+version = '2.0.0'
 # The full version, including alpha/beta/rc tags
-release = '1.0.1'
+release = '2.0.0'
 
 
 # -- General configuration ---------------------------------------------------
@@ -48,11 +48,9 @@ release = '1.0.1'
 # ones.
 extensions = [
     'sphinx.ext.autodoc',
-    'sphinx.ext.todo',
     'sphinx.ext.coverage',
-    'sphinx.ext.viewcode',
     'sphinx.ext.githubpages',
-    'sphinx.ext.napoleon',
+    'recommonmark'
 ]
 
 
@@ -195,7 +193,26 @@ epub_exclude_files = ['search.html']
 
 # -- Extension configuration -------------------------------------------------
 
-# -- Options for todo extension ----------------------------------------------
 
-# If true, `todo` and `todoList` produce output, else they produce nothing.
-todo_include_todos = True
+from recommonmark.transform import AutoStructify
+
+import m2r
+
+def docstring(app, what, name, obj, options, lines):
+    md  = '\n'.join(lines)
+    rst = m2r.convert(md)
+    lines.clear()
+    lines += rst.splitlines()
+
+
+github_doc_root = 'https://github.com/rtfd/recommonmark/tree/master/doc/'
+def setup(app):
+    app.connect('autodoc-process-docstring', docstring)
+    app.add_config_value('recommonmark_config', {
+            'url_resolver': lambda url: github_doc_root + url,
+            'auto_toc_tree_section': 'Contents',
+            }, True)
+    app.add_transform(AutoStructify)
+
+
+source_suffix = ['.rst', '.md']

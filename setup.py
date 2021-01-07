@@ -6,7 +6,7 @@ def parse_requirements(requirement_file):
 
 setup(
     name='py-ews',
-    version='1.1.0',
+    version='2.0.0',
     packages=find_packages(exclude=['tests*']),
     license='MIT',
     description='A Python package to interact with both on-premises and Office 365 Exchange Web Services',
@@ -17,5 +17,10 @@ setup(
     url='https://github.com/swimlane/pyews',
     author='Swimlane',
     author_email='info@swimlane.com',
-    python_requires='>=2.6, !=3.0.*, !=3.1.*, !=3.2.*, <4'
+    python_requires='>=2.6, !=3.0.*, !=3.1.*, !=3.2.*, <4',
+    entry_points={
+          'console_scripts': [
+              'pyews = pyews.__main__:main'
+          ]
+    },
 )
