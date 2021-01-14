@@ -44,15 +44,32 @@ class Core:
                 auth=(self.userconfiguration.credentials.email_address, self.userconfiguration.credentials.password),
                 verify=True
             )
+
+            __LOGGER__.debug('Response HTTP status code: %s', response.status_code)
+            __LOGGER__.debug('Response text: %s', response.text)
+
             parsed_response = BeautifulSoup(response.content, 'xml')
-            try:
-                if parsed_response.find('ResponseCode').string == 'ErrorAccessDenied':
-                    __LOGGER__.info('{}'.format(parsed_response.find('MessageText').string))
-                if parsed_response.find('ResponseCode').string == 'NoError':
-                    return parsed_response
-            except:
-                if parsed_response.find('ErrorCode').string == 'NoError':
-                    return parsed_response
+            if not parsed_response.contents:
+                __LOGGER__.warning(
+                    'The server responded with empty content to POST-request '
+                    'from {current}'.format(current=self.__class__.__name__))
+                return
+
+            response_code = getattr(parsed_response.find('ResponseCode'), 'string', None)
+            error_code = getattr(parsed_response.find('ErrorCode'), 'string', None)
+
+            if 'NoError' in (response_code, error_code):
+                return parsed_response.find
+            elif 'ErrorAccessDenied' in (response_code, error_code):
+                __LOGGER__.warning(
+                    'The server responded with "ErrorAccessDenied" '
+                    'response code to POST-request from {current}'.format(
+                        current=self.__class__.__name__))
+            else:
+                __LOGGER__.warning(
+                    'The server responded with unknown "ResponseCode" '
+                    'and "ErrorCode" from {current}'.format(
+                        current=self.__class__.__name__))
         except requests.exceptions.HTTPError as errh:
             __LOGGER__.info("An Http Error occurred attempting to connect to {ep}:".format(ep=endpoint) + repr(errh))
         except requests.exceptions.ConnectionError as errc:
@@ -61,5 +78,5 @@ class Core:
             __LOGGER__.info("A Timeout Error occurred attempting to connect to {ep}:".format(ep=endpoint) + repr(errt))
         except requests.exceptions.RequestException as err:
             __LOGGER__.info("An Unknown Error occurred attempting to connect to {ep}:".format(ep=endpoint) + repr(err))
-        __LOGGER__.warning('Unable to parse response from {current}'.format(current=self.__class__.__name__))
         return None
+
