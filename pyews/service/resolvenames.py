@@ -36,7 +36,7 @@ class ResolveNames(Core):
             value (str): The raw response from a SOAP request
         '''
         return_dict = {}
-        if value.find('ResolveNamesResponse'):
+        if value and value.find('ResolveNamesResponse'):
             temp = value.find('ServerVersionInfo')
             return_dict['server_version_info'] = temp
             ver = "{major}.{minor}".format(
