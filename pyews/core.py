@@ -59,7 +59,7 @@ class Core:
             error_code = getattr(parsed_response.find('ErrorCode'), 'string', None)
 
             if 'NoError' in (response_code, error_code):
-                return parsed_response.find
+                return parsed_response
             elif 'ErrorAccessDenied' in (response_code, error_code):
                 __LOGGER__.warning(
                     'The server responded with "ErrorAccessDenied" '
