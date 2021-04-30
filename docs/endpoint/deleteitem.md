@@ -5,7 +5,7 @@ This documentation provides details about the DeleteItem class within the `pyews
 This class is used to delete items (typically mailbox items) from the specified user mailbox.
 
 ```eval_rst
-.. automodule:: pyews.DeleteItem
+.. autoclass:: pyews.endpoint.deleteitem.DeleteItem
    :members:
    :undoc-members:
 ```

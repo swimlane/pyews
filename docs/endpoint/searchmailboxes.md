@@ -5,7 +5,7 @@ This documentation provides details about the SearchMailboxes class within the `
 This class is used to search users mailboxes for a specific item.
 
 ```eval_rst
-.. automodule:: pyews.SearchMailboxes
+.. autoclass:: pyews.endpoint.searchmailboxes.SearchMailboxes
    :members:
    :undoc-members:
 ```
