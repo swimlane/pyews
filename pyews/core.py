@@ -1,23 +1,66 @@
-import logging
-import requests
 import xmltodict
 import json
-from bs4 import BeautifulSoup
 
-__LOGGER__ = logging.getLogger(__name__)
+from .utils.logger import LoggingBase
 
 
-class Core:
+class Core(metaclass=LoggingBase):
+    """The Core class inherits logging and defines
+    required authentication details as well as parsing of results
+    """
 
-    SOAP_REQUEST_HEADER = {'content-type': 'text/xml; charset=UTF-8'}
+    @property
+    def credentials(cls):
+        return cls._credentials
 
-    def __init__(self, userconfiguration):
-        '''Parent class of all endpoints implemented within pyews
+    @credentials.setter
+    def credentials(cls, value):
+        if isinstance(value, tuple):
+            cls.domain = value[0]
+            cls._credentials = value
+        raise AttributeError('Please provide both a username and password')
+
+    @property
+    def exchange_versions(cls):
+        return cls._exchange_versions
+
+    @exchange_versions.setter
+    def exchange_versions(cls, value):
+        from .exchangeversion import ExchangeVersion
+        if not value:
+            cls._exchange_versions = ExchangeVersion.EXCHANGE_VERSIONS
+        elif not isinstance(value, list):
+            cls._exchange_versions = [value]
+        else:
+            cls._exchange_versions = value
+
+    @property
+    def endpoints(cls):
+        return cls._endpoints
+
+    @endpoints.setter
+    def endpoints(cls, value):
+        from .endpoints import Endpoints
+        if not value:
+            cls._endpoints = Endpoints(cls.domain).get()
+        elif not isinstance(value, list):
+            cls._endpoints = [value]
+        else:
+            cls._endpoints = value
+
+    @property
+    def domain(cls):
+        return cls._domain
+
+    @domain.setter
+    def domain(cls, value):
+        '''Splits the domain from an email address
         
-        Args:
-            userconfiguration (UserConfiguration): A UserConfiguration object created using the UserConfiguration class
+        Returns:
+            str: Returns the split domain from an email address
         '''
-        self.userconfiguration = userconfiguration
+        local, _, domain = value.partition('@')
+        cls._domain = domain
 
     def camel_to_snake(self, s):
         if s != 'UserDN':
@@ -25,58 +68,64 @@ class Core:
         else:
             return 'user_dn'
 
-    def invoke(self, soap_body):
-        '''Used to invoke an Autodiscover SOAP request
-        
+    def __process_keys(self, key):
+        return_value = key.replace('t:','')
+        if return_value.startswith('@'):
+            return_value = return_value.lstrip('@')
+        return self.camel_to_snake(return_value)
+
+    def _process_dict(self, obj):
+        if isinstance(obj, dict):
+            obj = {
+                self.__process_keys(key): self._process_dict(value) for key, value in obj.items()
+                }
+        return obj
+
+    def _get_recursively(self, search_dict, field):
+        """
+        Takes a dict with nested lists and dicts,
+        and searches all dicts for a key of the field
+        provided.
+        """
+        fields_found = []
+        if search_dict:
+            for key, value in search_dict.items():
+                if key == field:
+                    fields_found.append(value)
+                elif isinstance(value, dict):
+                    results = self._get_recursively(value, field)
+                    for result in results:
+                        fields_found.append(result)
+                elif isinstance(value, list):
+                    for item in value:
+                        if isinstance(item, dict):
+                            more_results = self._get_recursively(item, field)
+                            for another_result in more_results:
+                                fields_found.append(another_result)
+        return fields_found
+
+    def parse_response(self, soap_response, namespace_dict=None):
+        """parse_response is standardized to parse all soap_responses from
+        EWS requests
+
         Args:
-            soap_request (str): A formatted SOAP XML request body string
-            userconfiguration (UserConfiguration): A UserConfiguration object created using the UserConfiguration class
+            soap_response (BeautifulSoup): EWS SOAP response returned from the Base class
+            namespace_dict (dict, optional): A dictionary of namespaces to process. Defaults to None.
 
-        Raises:
-            SoapResponseHasError: Raises an error when unable to parse a SOAP response
-        '''
-        endpoint = self.userconfiguration.ews_url
-        try:
-            response = requests.post(
-                url=endpoint,
-                data=soap_body,
-                headers=self.SOAP_REQUEST_HEADER,
-                auth=(self.userconfiguration.credentials.email_address, self.userconfiguration.credentials.password),
-                verify=True
-            )
-
-            __LOGGER__.debug('Response HTTP status code: %s', response.status_code)
-            __LOGGER__.debug('Response text: %s', response.text)
-
-            parsed_response = BeautifulSoup(response.content, 'xml')
-            if not parsed_response.contents:
-                __LOGGER__.warning(
-                    'The server responded with empty content to POST-request '
-                    'from {current}'.format(current=self.__class__.__name__))
-                return
-
-            response_code = getattr(parsed_response.find('ResponseCode'), 'string', None)
-            error_code = getattr(parsed_response.find('ErrorCode'), 'string', None)
-
-            if 'NoError' in (response_code, error_code):
-                return parsed_response
-            elif 'ErrorAccessDenied' in (response_code, error_code):
-                __LOGGER__.warning(
-                    'The server responded with "ErrorAccessDenied" '
-                    'response code to POST-request from {current}'.format(
-                        current=self.__class__.__name__))
-            else:
-                __LOGGER__.warning(
-                    'The server responded with unknown "ResponseCode" '
-                    'and "ErrorCode" from {current}'.format(
-                        current=self.__class__.__name__))
-        except requests.exceptions.HTTPError as errh:
-            __LOGGER__.info("An Http Error occurred attempting to connect to {ep}:".format(ep=endpoint) + repr(errh))
-        except requests.exceptions.ConnectionError as errc:
-            __LOGGER__.info("An Error Connecting to the API occurred attempting to connect to {ep}:".format(ep=endpoint) + repr(errc))
-        except requests.exceptions.Timeout as errt:
-            __LOGGER__.info("A Timeout Error occurred attempting to connect to {ep}:".format(ep=endpoint) + repr(errt))
-        except requests.exceptions.RequestException as err:
-            __LOGGER__.info("An Unknown Error occurred attempting to connect to {ep}:".format(ep=endpoint) + repr(err))
-        return None
-
+        Returns:
+            list: Returns a list of dictionaries containing parsed responses from EWS requests.
+        """
+        ordered_dict = xmltodict.parse(str(soap_response), process_namespaces=True, namespaces=namespace_dict)
+        item_dict = json.loads(json.dumps(ordered_dict))
+        if hasattr(self, 'RESULTS_KEY'):
+            search_response = self._get_recursively(item_dict, self.RESULTS_KEY)
+            if search_response:
+                return_list = []
+                for item in search_response:
+                    if isinstance(item,list):
+                        for i in item:
+                            return_list.append(self._process_dict(i))
+                    else:
+                        return_list.append(self._process_dict(item))
+                return return_list
+        return self._process_dict(item_dict)
