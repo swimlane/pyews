@@ -18,4 +18,12 @@ setup(
     author='Swimlane',
     author_email='info@swimlane.com',
     python_requires='>=2.7, !=3.0.*, !=3.1.*, !=3.2.*,!=3.3.*,!=3.4.*,!=3.5.*, <4',
+    package_data={
+        'pyews':  ['data/logging.yml']
+    },
+    entry_points={
+          'console_scripts': [
+              'pyews = pyews.__main__:main'
+          ]
+    },
 )
