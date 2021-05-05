@@ -99,7 +99,10 @@ self.T_NAMESPACE.AlternateId(Format="EwsId", Id="AAMkAGZhN2IxYTA0LWNiNzItN=", Ma
 Now that we have our newly defined endpoint we can instantiate it and then just call the `run` method.
 
 ```python
+from pyews import Authentication
 from getappmanifests import GetAppManifests
+
+Authentication('username', 'password')
 
 print(GetAppManifests().run())
 ```

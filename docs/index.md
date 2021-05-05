@@ -97,6 +97,20 @@ ews = EWS(
 
 If you would like to specify a specific version of Exchange to use, you can provide that using the `exchange_version` parameter. By default `pyews` will attempt all Exchange versions as well as multiple static and generated EWS URLs.
 
+
+Finally, if you would like to `impersonate_as` a specific user you must provide their primary SMTP address when instantiating the `EWS` class object:
+
+
+```python
+from pyews import EWS
+
+ews = EWS(
+      'myaccount@company.com',
+      'Password1234',
+      impersonate_as='myotheraccount@company.com'
+)
+```
+
 ## Using Provided Methods
 
 Once you have instantiated the EWS class with your credentials, you will have access to pre-exposed methods for each endpoint.  These methods are:
@@ -114,19 +128,18 @@ Once you have instantiated the EWS class with your credentials, you will have ac
 * sync_folder_items
 * create_item
 
-## Importing Endpoints
+## Access Classes Directly
 
-If you would like to write your own methods, you can import each endpoint directly into your script.
-
-This example will demonstrate how you can identify which mailboxes you have access to by using the [GetSearchableMailboxes](endpoint/getsearchablemailboxes.md) EWS endpoint.
+In some cases you may want to skip using the `EWS` interface class and build your own wrapper around `py-ews`.  To do this, you must first import the `Authentication` class and provide
+credential and other details before invoking a desired `endpoint`. Below is an example of this:
 
 ```python
-from pyews import Core
-from pyews.endpoint import GetSearchableMailboxes
+from pyews import Authentication, GetSearchableMailboxes
 
-Core.exchange_versions = 'Exchange2016'
-Core.credentials = ('mymailbox@mailbox.com', 'some password')
-Core.endpoints = 'mailbox.com'
+Authentication(
+      'myaccount@company.com',
+      'Password1234'
+)
 
 reference_id_list = []
 for mailbox in GetSearchableMailboxes().run():
@@ -134,18 +147,11 @@ for mailbox in GetSearchableMailboxes().run():
       print(mailbox)
 ```
 
-Once you have identified a list of mailbox reference ids, then you can begin searching all of those mailboxes by using the [SearchMailboxes](endpoint/searchmailboxes.md) EWS endpoint.
-
-```python
-from pyews.endpoint import SearchMailboxes
-
-for search_item in SearchMailboxes('phish', reference_id_list).run():
-      print(search_item)
-```
+As you can see, you must instantiate the `Authentication` class first before calling an endpoint.  By the way, you can import all `endpoints` directly without using the `EWS` interface.
 
 **For more examples and usage, please refer to the individual class documentation**
 
-* [Endpoint](service/root.md)
+* [Endpoint](endpoint/root.md)
 
 ## Release History
  
@@ -176,6 +182,7 @@ Distributed under the MIT license. See ``LICENSE`` for more information.
    :maxdepth: 2
    :caption: Contents:
 
+   core/root
    endpoint/root
    service/root
    utils/root
