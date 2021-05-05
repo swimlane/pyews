@@ -4,7 +4,7 @@ from lxml.builder import ElementMaker
 from lxml import etree
 from bs4 import BeautifulSoup
 
-from ..core import Core
+from ..core import Core, Authentication
 
 
 class Base(Core):
@@ -64,6 +64,15 @@ class Base(Core):
     def get(self):
         raise NotImplementedError
 
+    def _impersonation_header(self):
+        if self.impersonate_as:
+            return self.T_NAMESPACE.ExchangeImpersonation(
+                self.T_NAMESPACE.ConnectingSID(
+                    self.T_NAMESPACE.PrimarySmtpAddress(self.impersonate_as)
+                )
+            )
+        return ''
+
     def __parse_convert_id_error_message(self, error_message):
         result = error_message.split('Please use the ConvertId method to convert the Id from ')[1].split(' format.')[0]
         return result.split(' to ')
@@ -84,8 +93,13 @@ class Base(Core):
         Returns:
             BeautifulSoup: Returns a BeautifulSoup object or None.
         """
-        for endpoint in Core.endpoints:
-            for version in Core.exchange_versions:
+        for item in Authentication.__dict__.keys():
+            if not item.startswith('_'):
+                if hasattr(Authentication, item):
+                    setattr(self, item, getattr(Authentication, item))
+
+        for endpoint in self.endpoints:
+            for version in self.exchange_versions:
                 if self.__class__.__base__.__name__ == 'Operation' and 'autodiscover' in endpoint:
                     self.__logger.debug('{} == Operation so skipping endpoint {}'.format(self.__class__.__base__.__name__, endpoint))
                     continue
@@ -98,7 +112,7 @@ class Base(Core):
                         url=endpoint,
                         data=self.get(version).decode("utf-8"),
                         headers=self.SOAP_REQUEST_HEADER,
-                        auth=Core.credentials,
+                        auth=self.credentials,
                         verify=True
                     )
 

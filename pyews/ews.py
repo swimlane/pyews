@@ -1,26 +1,11 @@
-from .core import Core
+from .core import Authentication
 from .endpoint import GetSearchableMailboxes, GetUserSettings, ResolveNames, SearchMailboxes, ExecuteSearch, GetInboxRules, GetItem, ConvertId, GetHiddenInboxRules, CreateItem, GetServiceConfiguration, SyncFolderHierarchy, SyncFolderItems, GetAttachment
-from .exchangeversion import ExchangeVersion
-from .endpoints import Endpoints
 
 
 class EWS:
 
-    _credentials = None
-    _ews_url = None
-    _exchange_version = None
-
-    def __init__(self, username, password, ews_url=None, exchange_version=ExchangeVersion.EXCHANGE_VERSIONS):
-        Core.exchange_versions = exchange_version
-        Core.credentials = (username, password)
-        Core.domain = username
-        if not ews_url:
-            local, _, domain = username.partition('@')
-            Core.endpoints = Endpoints(domain).get()
-        elif not isinstance(ews_url, list):
-            Core.endpoints = [ews_url]
-        else:
-            Core.endpoints = ews_url
+    def __init__(self, username, password, ews_url=None, exchange_version=None, impersonate_as=None):
+        Authentication(username, password, ews_url=ews_url, exchange_version=exchange_version, impersonate_as=impersonate_as)
 
     def get_service_configuration(self, configuration_name=None, acting_as=None):
         return GetServiceConfiguration(configuration_name=configuration_name, acting_as=acting_as).run()
