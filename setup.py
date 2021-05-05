@@ -5,7 +5,7 @@ def parse_requirements(requirement_file):
         return f.readlines()
 
 setup(
-    name='py-ews',
+    name='py-ews-dev',
     version='3.0.0',
     packages=find_packages(exclude=['tests*']),
     license='MIT',
