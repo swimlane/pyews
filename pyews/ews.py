@@ -1,7 +1,7 @@
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
 from .core import Authentication
-from .endpoint import GetSearchableMailboxes, GetUserSettings, ResolveNames, SearchMailboxes, ExecuteSearch, GetInboxRules, GetItem, ConvertId, GetHiddenInboxRules, CreateItem, GetServiceConfiguration, SyncFolderHierarchy, SyncFolderItems, GetAttachment, DeleteItem
+from .endpoint import GetSearchableMailboxes, GetUserSettings, ResolveNames, SearchMailboxes, ExecuteSearch, GetInboxRules, GetItem, ConvertId, GetHiddenInboxRules, CreateItem, GetServiceConfiguration, SyncFolderHierarchy, SyncFolderItems, GetAttachment, DeleteItem, GetDomainSettings
 
 
 class EWS:
@@ -121,3 +121,6 @@ class EWS:
                 else:
                     self.delete_item(item.get('id').get('id'))
                 count += 1
+
+    def get_domain_settings(self, domain=None):
+        return GetDomainSettings(domain=domain).run()
