@@ -65,10 +65,10 @@ class Base(Core):
         raise NotImplementedError
 
     def _impersonation_header(self):
-        if self.impersonate_as:
+        if hasattr(Authentication, 'impersonate_as') and Authentication.impersonate_as:
             return self.T_NAMESPACE.ExchangeImpersonation(
                 self.T_NAMESPACE.ConnectingSID(
-                    self.T_NAMESPACE.PrimarySmtpAddress(self.impersonate_as)
+                    self.T_NAMESPACE.PrimarySmtpAddress(Authentication.impersonate_as)
                 )
             )
         return ''
@@ -98,8 +98,8 @@ class Base(Core):
                 if hasattr(Authentication, item):
                     setattr(self, item, getattr(Authentication, item))
 
-        for endpoint in self.endpoints:
-            for version in self.exchange_versions:
+        for version in Authentication.exchange_versions:
+            for endpoint in Authentication.endpoints:
                 if self.__class__.__base__.__name__ == 'Operation' and 'autodiscover' in endpoint:
                     self.__logger.debug('{} == Operation so skipping endpoint {}'.format(self.__class__.__base__.__name__, endpoint))
                     continue
@@ -108,23 +108,23 @@ class Base(Core):
                     continue
                 try:
                     self.__logger.info('Sending SOAP request to {}'.format(endpoint))
+                    self.__logger.info('Setting Exchange Version header to {}'.format(version))
                     response = requests.post(
                         url=endpoint,
                         data=self.get(version).decode("utf-8"),
                         headers=self.SOAP_REQUEST_HEADER,
-                        auth=self.credentials,
+                        auth=Authentication.credentials,
                         verify=True
                     )
 
-                    self.__logger.debug('Response HTTP status code: %s', response.status_code)
-                    self.__logger.debug('Response text: %s', response.text)
+                    self.__logger.debug('Response HTTP status code: {}'.format(response.status_code))
+                    self.__logger.debug('Response text: {}'.format(response.text))
 
                     parsed_response = BeautifulSoup(response.content, 'xml')
                     if not parsed_response.contents:
                         self.__logger.warning(
                             'The server responded with empty content to POST-request '
                             'from {current}'.format(current=self.__class__.__name__))
-                        return
 
                     response_code = getattr(parsed_response.find('ResponseCode'), 'string', None)
                     error_code = getattr(parsed_response.find('ErrorCode'), 'string', None)
@@ -148,7 +148,6 @@ class Base(Core):
                             'response code to POST-request from {current} with error message "{message_text}"'.format(
                                 current=self.__class__.__name__,
                                 message_text=message_text))
-                        return None
                     elif 'ErrorInvalidIdMalformed' in (response_code, error_code):
                         self.__logger.warning(
                             'The server responded with "ErrorInvalidIdMalformed" '
@@ -170,5 +169,6 @@ class Base(Core):
                             'and "ErrorCode" from {current} with error message "{message_text}"'.format(
                                 current=self.__class__.__name__,
                                 message_text=message_text))
+                        continue
                 except:
                     pass
