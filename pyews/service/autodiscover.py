@@ -1,4 +1,4 @@
-from .base import Base, ElementMaker, abc, etree
+from .base import Base, ElementMaker, abc, etree, Authentication
 
 
 class Autodiscover(Base):
@@ -23,7 +23,7 @@ class Autodiscover(Base):
 
     @property
     def to(self):
-        return self.credentials[0]
+        return Authentication.credentials[0]
 
     def get(self, exchange_version):
         self.__logger.info('Building Autodiscover SOAP request for {current}'.format(current=self.__class__.__name__))
