@@ -109,9 +109,11 @@ class Base(Core):
                 try:
                     self.__logger.info('Sending SOAP request to {}'.format(endpoint))
                     self.__logger.info('Setting Exchange Version header to {}'.format(version))
+                    body = self.get(version).decode("utf-8")
+                    self.__logger.debug('EWS SOAP Request Body: {}'.format(body))
                     response = requests.post(
                         url=endpoint,
-                        data=self.get(version).decode("utf-8"),
+                        data=body,
                         headers=self.SOAP_REQUEST_HEADER,
                         auth=Authentication.credentials,
                         verify=True
