@@ -1,4 +1,4 @@
-from ..service.autodiscover import Autodiscover
+from ..service.autodiscover import Autodiscover, Authentication
 
 
 class GetUserSettings(Autodiscover):
@@ -18,7 +18,7 @@ class GetUserSettings(Autodiscover):
 
     def soap(self):
         if not self.user:
-            self.user = self.credentials[0]
+            self.user = Authentication.credentials[0]
         return self.A_NAMESPACE.GetUserSettingsRequestMessage(
             self.A_NAMESPACE.Request(
                 self.A_NAMESPACE.Users(
