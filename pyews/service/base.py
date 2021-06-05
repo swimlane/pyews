@@ -111,10 +111,16 @@ class Base(Core):
                     self.__logger.info('Setting Exchange Version header to {}'.format(version))
                     body = self.get(version).decode("utf-8")
                     self.__logger.debug('EWS SOAP Request Body: {}'.format(body))
+                    if Authentication.auth_header:
+                        header_dict = Authentication.auth_header
+                        header_dict.update(self.SOAP_REQUEST_HEADER)
+                    else:
+                        header_dict = self.SOAP_REQUEST_HEADER
+                    self.__logger.debug(f"Headers: {header_dict}")
                     response = requests.post(
                         url=endpoint,
                         data=body,
-                        headers=self.SOAP_REQUEST_HEADER,
+                        headers=header_dict,
                         auth=Authentication.credentials,
                         verify=True
                     )
