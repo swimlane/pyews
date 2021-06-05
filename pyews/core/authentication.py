@@ -1,5 +1,7 @@
+from os import access
 from .exchangeversion import ExchangeVersion
 from .core import Core
+from .oauthconnector import OAuth2Connector
 
 
 class AuthenticationProperties(type):
@@ -7,8 +9,92 @@ class AuthenticationProperties(type):
     def __set_initial_property_values(cls):
         if isinstance(cls._credentials, tuple):
             cls.domain = cls._credentials[0]
+            if cls.impersonate_as is not '':
+                cls.auth_header = cls._credentials[0]
+            else:
+                cls.auth_header = None
             cls.endpoints = None
             cls.exchange_versions = None
+            if cls.tenant_id and cls.client_id and cls.client_secret:
+                if not cls.oauth2_authorization_type:
+                    print('Please provide an OAuth2 Authorization Types before continuing')
+                else:
+                    try:
+                        cls.access_token = getattr(OAuth2Connector(), cls.oauth2_authorization_type)()
+                    except:
+                        cls.access_token = getattr(OAuth2Connector(endpoint_version='v2'), cls.oauth2_authorization_type)()
+
+    @property
+    def oauth2_authorization_type(cls):
+        return cls._oauth2_authorization_type
+
+    @oauth2_authorization_type.setter
+    def oauth2_authorization_type(cls, value):
+        if value in ['legacy_app_flow', 'auth_code_grant', 'client_credentials_grant', 'backend_app_flow', 'web_application_flow', 'implicit_grant_flow']:
+            cls._oauth2_authorization_type = value
+            cls.__set_initial_property_values()
+
+    @property
+    def client_id(cls):
+        return cls._client_id
+
+    @client_id.setter
+    def client_id(cls, value):
+        cls._client_id = value
+
+    @property
+    def client_secret(cls):
+        return cls._client_secret
+
+    @client_secret.setter
+    def client_secret(cls, value):
+        cls._client_secret = value
+
+    @property
+    def tenant_id(cls):
+        return cls._tenant_id
+
+    @tenant_id.setter
+    def tenant_id(cls, value):
+        cls._tenant_id = value
+
+    @property
+    def access_token(cls):
+        return cls._access_token
+
+    @access_token.setter
+    def access_token(cls, value):
+        cls._access_token = value
+
+    @property
+    def redirect_uri(cls):
+        return cls._redirect_uri
+
+    @redirect_uri.setter
+    def redirect_uri(cls, value):
+        cls._redirect_uri = value
+
+    @property
+    def auth_header(cls):
+        cls.__set_initial_property_values()
+        if cls.access_token:
+            cls._auth_header.update({
+                'Authorization': 'Bearer {}'.format(cls.access_token)
+            })
+        return cls._auth_header
+
+    @auth_header.setter
+    def auth_header(cls, value):
+        if value:
+            cls._auth_header = {
+                'X-AnchorMailbox': value
+            }
+        elif cls.impersonate_as is not '':
+            cls._auth_header = {
+                'X-AnchorMailbox': cls.impersonate_as
+            }
+        else:
+            cls._auth_header = {}
 
     @property
     def impersonate_as(cls):
@@ -81,8 +167,15 @@ class AuthenticationProperties(type):
 
 class Authentication(object, metaclass=AuthenticationProperties):
 
+    _auth_header = {}
+    _oauth2_authorization_type = None
+    _client_id = None
+    _client_secret = None
+    _tenant_id = None
+    _access_token = None
     _impersonate_as = None
     _credentials = tuple()
     _exchange_versions = []
     _endpoints = []
     _domain = None
+    _redirect_uri = 'https://google.com'
