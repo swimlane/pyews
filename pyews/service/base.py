@@ -99,7 +99,7 @@ class Base(Core):
                     setattr(self, item, getattr(Authentication, item))
 
         for version in Authentication.exchange_versions:
-            for endpoint in Authentication.endpoints:
+            for endpoint in Authentication.ews_url:
                 if self.__class__.__base__.__name__ == 'Operation' and 'autodiscover' in endpoint:
                     self.__logger.debug('{} == Operation so skipping endpoint {}'.format(self.__class__.__base__.__name__, endpoint))
                     continue
