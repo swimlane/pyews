@@ -1,3 +1,4 @@
+import os
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
 from .core import Authentication
@@ -6,9 +7,9 @@ from .endpoint import GetSearchableMailboxes, GetUserSettings, ResolveNames, Sea
 
 class EWS:
 
-    def __init__(self, username, password, endpoints=None, exchange_version=None, impersonate_as=None, multi_threading=False):
+    def __init__(self, username, password, ews_url=None, exchange_version=None, impersonate_as=None, multi_threading=False):
         Authentication.credentials = (username, password)
-        Authentication.endpoints = endpoints
+        Authentication.ews_url = ews_url
         Authentication.exchange_versions = exchange_version
         Authentication.impersonate_as = impersonate_as
         self.multi_threading = multi_threading
@@ -32,7 +33,7 @@ class EWS:
     def __execute_multithreaded_search(self, query, reference_id, scope):
         return SearchMailboxes(query=query, reference_id=reference_id, search_scope=scope).run()
 
-    def execute_ews_search(self, query, reference_id, search_scope='All', thread_count=10):
+    def execute_ews_search(self, query, reference_id, search_scope='All', thread_count=os.cpu_count()*5):
         response = []
         return_list = []
         if self.multi_threading:
@@ -109,7 +110,7 @@ class EWS:
         for item in item_id:
             deleted_item = DeleteItem(item, delete_type=delete_type).run()
 
-    def search_and_delete_message(self, query, thread_count=10, what_if=False):
+    def search_and_delete_message(self, query, thread_count=os.cpu_count()*5, what_if=False):
         reference_id_list = []
         for mailbox in self.get_searchable_mailboxes():
             reference_id_list.append(mailbox.get('reference_id'))
