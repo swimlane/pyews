@@ -97,7 +97,6 @@ ews = EWS(
 
 If you would like to specify a specific version of Exchange to use, you can provide that using the `exchange_version` parameter. By default `pyews` will attempt all Exchange versions as well as multiple static and generated EWS URLs.
 
-
 Finally, if you would like to `impersonate_as` a specific user you must provide their primary SMTP address when instantiating the `EWS` class object:
 
 
@@ -110,6 +109,10 @@ ews = EWS(
       impersonate_as='myotheraccount@company.com'
 )
 ```
+
+### Exchange Search Multi-Threading
+
+You can also specify `multi_threading=True` and when you search mailboxes we will use multi-threading to perform the search.
 
 ## Using Provided Methods
 
