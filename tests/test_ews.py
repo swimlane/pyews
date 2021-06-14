@@ -8,6 +8,6 @@ def test_instantiation_of_ews_interface(pyews_ews_interface):
     from pyews import Authentication
     assert Authentication.credentials == ('username@company.com','mypassword1')
     assert Authentication.domain == 'company.com'
-    assert isinstance(Authentication.endpoints, list)
+    assert isinstance(Authentication.ews_url, list)
     assert isinstance(Authentication.exchange_versions, list)
     assert Authentication.impersonate_as is ''
