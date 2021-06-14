@@ -13,7 +13,7 @@ class AuthenticationProperties(type):
                 cls.auth_header = cls._credentials[0]
             else:
                 cls.auth_header = None
-            cls.endpoints = None
+            cls.ews_url = None
             cls.exchange_versions = None
             if cls.tenant_id and cls.client_id and cls.client_secret:
                 if not cls.oauth2_authorization_type:
@@ -135,18 +135,18 @@ class AuthenticationProperties(type):
         cls._exchange_versions = value
 
     @property
-    def endpoints(cls):
-        return cls._endpoints
+    def ews_url(cls):
+        return cls._ews_url
 
-    @endpoints.setter
-    def endpoints(cls, value):
+    @ews_url.setter
+    def ews_url(cls, value):
         if not value:
             from .endpoints import Endpoints
-            cls._endpoints = Endpoints(cls._domain).get()
+            cls._ews_url = Endpoints(cls._domain).get()
         elif not isinstance(value, list):
-            cls._endpoints = [value]
+            cls._ews_url = [value]
         else:
-            cls._endpoints = value
+            cls._ews_url = value
 
     @property
     def domain(cls):
@@ -176,6 +176,6 @@ class Authentication(object, metaclass=AuthenticationProperties):
     _impersonate_as = None
     _credentials = tuple()
     _exchange_versions = []
-    _endpoints = []
+    _ews_url = []
     _domain = None
     _redirect_uri = 'https://google.com'
