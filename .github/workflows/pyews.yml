@@ -22,7 +22,7 @@ jobs:
     - if: matrix.os == 'ubuntu-latest'
       name: Install build dependencies
       run: |
-        sudo apt-get install libxml2 libxslt1.1 libxml2-dev libxslt1-dev python-libxml2 python-libxslt1
+        sudo apt-get install libxml2-dev libxslt-dev python-dev
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
