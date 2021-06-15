@@ -75,6 +75,14 @@ class AuthenticationProperties(type):
         cls._redirect_uri = value
 
     @property
+    def oauth2_scope(cls):
+        return cls._oauth2_scope
+
+    @oauth2_scope.setter
+    def oauth2_scope(cls, value):
+        cls._oauth2_scope = value
+
+    @property
     def auth_header(cls):
         cls.__set_initial_property_values()
         if cls.access_token:
@@ -169,6 +177,7 @@ class Authentication(object, metaclass=AuthenticationProperties):
 
     _auth_header = {}
     _oauth2_authorization_type = None
+    _oauth2_scope = None
     _client_id = None
     _client_secret = None
     _tenant_id = None

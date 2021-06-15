@@ -1,22 +1,13 @@
 from oauthlib.oauth2.rfc6749.errors import InvalidGrantError
-from xmltodict import parse
-import requests, pendulum
-import json
+import requests
 from urllib.parse import urlparse, parse_qsl, urlencode, urlunparse
-
 from oauthlib.oauth2 import LegacyApplicationClient
 from oauthlib.oauth2 import BackendApplicationClient
 from requests_oauthlib import OAuth2Session
 
-#__AUTHORITY_URL__ = 'https://login.microsoftonline.com/{{tenant}}'
-#__TOKEN_ENDPOINT__ = '/oauth2/v2.0/token'
-#__API_VERSION__ = 'v1.0'
-#__BASE_URL__ = 'https://graph.microsoft.com'
-
-
 
 class OAuth2Connector:
-    """GraphConnector is the main authentication mechanism for Microsoft Graph OAuth2 Authentication
+    """OAuth2Connector is the main authentication mechanism for Microsoft Graph OAuth2 Authentication
     """
     AUTH_MAP = {
         'v1': {
@@ -32,7 +23,7 @@ class OAuth2Connector:
     }
 
     def __init__(self, endpoint_version='v1'):
-        """GraphConnector is the base (parent) class of both Search and Delete classes.  It is used to perform either delegated authentication flows
+        """OAuth2Connector is the base (parent) class of both Search and Delete classes.  It is used to perform either delegated authentication flows
         like: (Single-Page, Web Apps, Mobile & Native Apps - Grant Auth Flow) or you can use it in the application authentication auth flows like: (Client Credentials Grant Auth Flow)
 
         
@@ -61,30 +52,19 @@ class OAuth2Connector:
             self.resource = self.AUTH_MAP.get(endpoint_version).get('resource')
         else:
             self.resource = None
-        if endpoint_version == 'v2':
-            self.scope = [self.AUTH_MAP.get(endpoint_version).get('scope')]
+        if not Authentication.oauth2_scope:
+            if endpoint_version == 'v2':
+                self.scope = [self.AUTH_MAP.get(endpoint_version).get('scope')]
+            else:
+                self.scope = None
         else:
-            self.scope = None
+            self.scope = Authentication.oauth2_scope
         self.session = requests.Session()
         self.session.headers = {
             'Content-Type': 'application/x-www-form-urlencoded'
         }
         self.session.verify = self.verify
         self.expiration = None
-        #if not self.access_token:
-        #    if self.client_secret and self.client_id and self.tenant_id and self.username and self.password:
-        #        if self.scope or self.resource:
-        #            self.legacy_app_flow()
-        #    if self.client_secret and self.client_id and self.tenant_id and self.redirect_uri and self.scope:
-        #        self.auth_code_grant()
-        #    elif self.client_secret and self.client_id and self.tenant_id:
-        #        if self.scope or self.resource:
-        #            self.client_credentials_grant()
-        #            self.backend_app_flow()
-        #        else:
-        #            self.web_application_flow()
-        #    else:
-        #        self.implicit_grant_flow()
 
     def __prompt_user(self, url, full_response=False):
         print('Please go here and authorize: ', url)
@@ -168,7 +148,7 @@ grant_type=authorization_code
     def web_application_flow(self):
         oauth = OAuth2Session(
             client_id=self.client_id,
-            redirect_uri='http://google.com',
+            redirect_uri=self.redirect_uri,
             scope=self.scope
             )
         authorization_url, state = oauth.authorization_url(self.authorize_url)
