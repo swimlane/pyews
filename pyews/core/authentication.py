@@ -9,7 +9,7 @@ class AuthenticationProperties(type):
     def __set_initial_property_values(cls):
         if isinstance(cls._credentials, tuple):
             cls.domain = cls._credentials[0]
-            if cls.impersonate_as is not '':
+            if cls.impersonate_as != '':
                 cls.auth_header = cls._credentials[0]
             else:
                 cls.auth_header = None
@@ -97,7 +97,7 @@ class AuthenticationProperties(type):
             cls._auth_header = {
                 'X-AnchorMailbox': value
             }
-        elif cls.impersonate_as is not '':
+        elif cls.impersonate_as != '':
             cls._auth_header = {
                 'X-AnchorMailbox': cls.impersonate_as
             }
