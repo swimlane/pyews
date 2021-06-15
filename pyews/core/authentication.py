@@ -1,7 +1,7 @@
 from os import access
 from .exchangeversion import ExchangeVersion
 from .core import Core
-from .oauthconnector import OAuth2Connector
+from .oauth2connector import OAuth2Connector
 
 
 class AuthenticationProperties(type):
