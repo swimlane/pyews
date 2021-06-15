@@ -18,6 +18,11 @@ jobs:
       uses: actions/setup-python@v1
       with:
         python-version: ${{ matrix.python-version }}
+    # install dependencies on Ubuntu
+    - if: matrix.os == 'ubuntu-latest'
+      name: Install build dependencies
+      run: |
+        sudo apt-get install libxml2 libxslt1.1 libxml2-dev libxslt1-dev python-libxml2 python-libxslt1
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
