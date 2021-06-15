@@ -7,11 +7,19 @@ from .endpoint import GetSearchableMailboxes, GetUserSettings, ResolveNames, Sea
 
 class EWS:
 
-    def __init__(self, username, password, ews_url=None, exchange_version=None, impersonate_as=None, multi_threading=False):
+    def __init__(self, 
+        username, password, ews_url=None, exchange_version=None, impersonate_as=None, multi_threading=False, 
+        tenant_id=None, client_id=None, client_secret=None, oauth2_authorization_type='auth_code_grant', redirect_uri=None, oauth2_scope=None):
         Authentication.credentials = (username, password)
         Authentication.ews_url = ews_url
         Authentication.exchange_versions = exchange_version
         Authentication.impersonate_as = impersonate_as
+        Authentication.tenant_id = tenant_id
+        Authentication.client_id = client_id
+        Authentication.client_secret = client_secret
+        Authentication.oauth2_authorization_type = oauth2_authorization_type
+        Authentication.redirect_uri = redirect_uri
+        Authentication.oauth2_scope = oauth2_scope
         self.multi_threading = multi_threading
 
     def chunk(self, items, n):
