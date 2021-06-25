@@ -1,3 +1,10 @@
+TRAVERSAL_LIST = [
+    'Deep',
+    'Shallow',
+    'SoftDeleted',
+    'Associated'
+]
+
 FOLDER_LIST = [
         'msgfolderroot',
         'calendar',
