@@ -28,6 +28,7 @@
 * Autodiscover support
 * Delegation support
 * Impersonation support
+* OAUth2 support
 * Retrieve all mailboxes that can be searched based on credentials provided
 * Search a list of (or single) mailboxes in your Exchange environment using all supported search attributes
 * Delete email items from mailboxes in your Exchange environment
@@ -39,10 +40,14 @@ Currently this package supports the following endpoint's:
 
 * [AddDelegate](docs/endpoint/adddelegate.md)
 * [ConvertId](docs/endpoint/convertid.md)
+* [CreateFolder](docs/endpoint/createfolder.md)
 * [CreateItem](docs/endpoint/createitem.md)
+* [DeleteFolder](docs/endpoint/deletefolder.md)
 * [DeleteItem](docs/endpoint/deleteitem.md)
 * [ExecuteSearch](docs/endpoint/executesearch.md)
 * [ExpandDL](docs/endpoint/expanddl.md)
+* [FindFolder](docs/endpoint/findfolder.md)
+* [FindItem](docs/endpoint/finditem.md)
 * [GetAttachment](docs/endpoint/getattachment.md)
 * [GetHiddenInboxRules](docs/endpoint/gethiddeninboxrules.md)
 * [GetInboxRules](docs/endpoint/getinboxrules.md)
@@ -114,6 +119,10 @@ ews = EWS(
 )
 ```
 
+### Exchange Search Multi-Threading
+
+You can also specify `multi_threading=True` and when you search mailboxes we will use multi-threading to perform the search.
+
 ## Using Provided Methods
 
 Once you have instantiated the EWS class with your credentials, you will have access to pre-exposed methods for each endpoint.  These methods are:
@@ -127,9 +136,18 @@ Once you have instantiated the EWS class with your credentials, you will have ac
 * get_inbox_rules
 * get_hidden_inbox_rules
 * get_item
+* get_attachment
 * sync_folder_hierarchy
 * sync_folder_items
 * create_item
+* delete_item
+* search_and_delete_message
+* get_domain_settings
+* find_items
+* search_mailboxes_using_find_item
+* create_search_folder
+* find_search_folder
+* delete_search_folder
 
 ## Access Classes Directly
 

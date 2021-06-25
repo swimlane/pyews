@@ -10,10 +10,14 @@ All endpoints inherit from either the Autodiscover or Operation classes. These c
 
    adddelegate
    convertid
+   createfolder
    createitem
+   deletefolder
    deleteitem
    executesearch
    expanddl
+   findfolder
+   finditem
    getattachment
    gethiddeninboxrules
    getinboxrules
