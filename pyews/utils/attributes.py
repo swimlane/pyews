@@ -188,3 +188,38 @@ MESSAGE_ELEMENTS = {
        'true'
    ]
 }
+
+SEARCH_FILTERS = {
+    'Contains': {
+        'ContainmentMode': [
+            'FullString',
+            'Prefixed',
+            'Substring',
+            'PrefixOnWords',
+            'ExactPhrase'
+        ],
+        'ContainmentComparison': [
+            'Exact',
+            'IgnoreCase',
+            'IgnoreNonSpacingCharacters',
+            'Loose',
+            'IgnoreCaseAndNonSpacingCharacters',
+            'LooseAndIgnoreCase',
+            'LooseAndIgnoreNonSpace',
+            'LooseAndIgnoreCaseAndIgnoreNonSpace'
+        ]
+    },
+    'Excludes': {
+        'Bitmask': []
+    },
+    'Exists': {},
+    'IsEqualTo': {
+        'FieldURIOrConstant': []
+    },
+    'IsNotEqualTo': {},
+    'IsGreaterThan': {},
+    'IsGreaterThanOrEqualTo': {},
+    'IsLessThan': {},
+    'IsLessThanOrEqualTo': {}
+}
+
