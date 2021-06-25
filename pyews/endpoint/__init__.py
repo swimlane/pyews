@@ -14,3 +14,4 @@ from .syncfolderitems import SyncFolderItems
 from .createitem import CreateItem
 from .getserviceconfiguration import GetServiceConfiguration
 from .getdomainsettings import GetDomainSettings
+from .createfolder import CreateFolder
