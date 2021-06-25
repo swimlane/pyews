@@ -5,6 +5,7 @@ from lxml import etree
 from bs4 import BeautifulSoup
 
 from ..core import Core, Authentication
+from ..utils.attributes import RESPONSE_CODES
 
 
 class Base(Core):
@@ -13,7 +14,7 @@ class Base(Core):
     It is inherited by the Autodiscover & Operation classes
     """
 
-    SOAP_REQUEST_HEADER = {'content-type': 'text/xml; charset=UTF-8'}
+    SOAP_REQUEST_HEADER = {'content-type': 'text/xml', 'charset': 'UTF-8'}
     NAMESPACE_MAP = {
         'soap': "http://schemas.xmlsoap.org/soap/envelope/", 
         'm': "http://schemas.microsoft.com/exchange/services/2006/messages", 
@@ -86,6 +87,18 @@ class Base(Core):
             namespace_dict[val] = None
         return self.parse_response(response, namespace_dict=namespace_dict)
 
+    def __log_warning(self, kwargs):
+        log_message = f'''
+The server responded with:
+    response code: {kwargs.get('response_code')}
+    error code: {kwargs.get('error_code')}
+    from: {kwargs.get('from')}
+    error message: {kwargs.get('message_text')}
+'''
+        if kwargs.get('additional_text'):
+            log_message += f'''\n\t{kwargs.get('additional_text')}'''
+        return log_message
+
     def run(self):
         """The Base class run method is used for all SOAP requests for
         every endpoint defined
@@ -127,6 +140,7 @@ class Base(Core):
 
                     self.__logger.debug('Response HTTP status code: {}'.format(response.status_code))
                     self.__logger.debug('Response text: {}'.format(response.text))
+                    self.__logger.debug('Response content: {}'.format(response.content))
 
                     parsed_response = BeautifulSoup(response.content, 'xml')
                     if not parsed_response.contents:
@@ -143,40 +157,44 @@ class Base(Core):
 
                     if 'NoError' in (response_code, error_code):
                         return self.__process_response(parsed_response)
-                    elif error_message:
-                        self.__logger.warning(
-                            'The server responded with "{response_code}" '
-                            'response code to POST-request from {current} with error message "{error_message}"'.format(
-                                current=self.__class__.__name__,
-                                error_message=error_message,
-                                response_code=response_code))
-                    elif 'ErrorAccessDenied' in (response_code, error_code):
-                        self.__logger.warning(
-                            'The server responded with "ErrorAccessDenied" '
-                            'response code to POST-request from {current} with error message "{message_text}"'.format(
-                                current=self.__class__.__name__,
-                                message_text=message_text))
-                    elif 'ErrorInvalidIdMalformed' in (response_code, error_code):
-                        self.__logger.warning(
-                            'The server responded with "ErrorInvalidIdMalformed" '
-                            'response code to POST-request from {current} with error message "{message_text}"'.format(
-                                current=self.__class__.__name__,
-                                message_text=message_text))
+                    if response_code in RESPONSE_CODES or error_code in RESPONSE_CODES or error_message:
+                        warning_dict = {
+                            'response_code': response_code,
+                            'error_code': error_code,
+                            'from': self.__class__.__name__,
+                            'message_text': message_text
+                        }
                         if 'ConvertId' in message_text:
                             return self.__parse_convert_id_error_message(message_text)
+                        if 'ErrorAccessDenied' in (response_code, error_code) and endpoint in ('GetSearchableMailboxes', 'SearchMailboxes'):
+                            warning_dict.update({
+                                'additional_text': 'Please make sure you have Discovery Management rights: https://docs.microsoft.com/en-us/Exchange/policy-and-compliance/ediscovery/assign-permissions?redirectedfrom=MSDN&view=exchserver-2019'
+                            })
+                        elif error_message:
+                            warning_dict.update({
+                                'additional_text': error_message
+                            })
+                        self.__logger.info(self.__log_warning(warning_dict))
+                        continue
                     elif fault_message or fault_string:
-                        self.__logger.warning(
-                            'The server responded with a "{fault_message}" '
-                            'to POST-request from {current} with error message "{fault_string}"'.format(
-                                current=self.__class__.__name__,
-                                fault_message=fault_message,
-                                fault_string=fault_string))
+                        warning_dict = {
+                            'response_code': response_code,
+                            'error_code': error_code,
+                            'from': self.__class__.__name__,
+                            'message_text': fault_message,
+                            'additional_text': fault_string
+                        }
+                        self.__logger.info(self.__log_warning(warning_dict))
+                        continue
                     else:
-                        self.__logger.warning(
-                            'The server responded with unknown "ResponseCode" '
-                            'and "ErrorCode" from {current} with error message "{message_text}"'.format(
-                                current=self.__class__.__name__,
-                                message_text=message_text))
+                        warning_dict = {
+                            'response_code': 'Unknown',
+                            'error_code': 'Unknown',
+                            'from': self.__class__.__name__,
+                            'message_text': message_text,
+                            'additional_text': 'This error is unrecognized and is not a valid response code or error code.'
+                        }
+                        self.__logger.info(self.__log_warning(warning_dict))
                         continue
                 except:
                     pass
