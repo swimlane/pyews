@@ -16,4 +16,6 @@ from .getserviceconfiguration import GetServiceConfiguration
 from .getdomainsettings import GetDomainSettings
 from .createfolder import CreateFolder
 from .deletefolder import DeleteFolder
+from .finditem import FindItem
 from .findfolder import FindFolder
+from .deletefolder import DeleteFolder
