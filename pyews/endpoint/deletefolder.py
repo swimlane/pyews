@@ -1,6 +1,4 @@
 from ..service import Operation
-from ..utils.exceptions import UknownValueError
-from ..utils.attributes import FOLDER_LIST, TRAVERSAL_LIST
 
 
 class DeleteFolder(Operation):
@@ -10,7 +8,7 @@ class DeleteFolder(Operation):
 
     RESULTS_KEY = 'Folders'
 
-    def __init__(self, folder_id=):
+    def __init__(self, folder_id):
         """
         """
         self.folder_id = folder_id
