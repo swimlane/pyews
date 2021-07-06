@@ -5,8 +5,8 @@ def parse_requirements(requirement_file):
         return f.readlines()
 
 setup(
-    name='py-ews-dev',
-    version='3.1.0',
+    name='py-ews',
+    version='3.0.0',
     packages=find_packages(exclude=['tests*']),
     license='MIT',
     description='A Python package to interact with both on-premises and Office 365 Exchange Web Services',
