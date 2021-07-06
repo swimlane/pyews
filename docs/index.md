@@ -28,20 +28,37 @@
 * Autodiscover support
 * Delegation support
 * Impersonation support
+* OAUth2 support
 * Retrieve all mailboxes that can be searched based on credentials provided
 * Search a list of (or single) mailboxes in your Exchange environment using all supported search attributes
 * Delete email items from mailboxes in your Exchange environment
 * Retrieve mailbox inbox rules for a specific account
 * Find additional hidden inbox rules for a specified account
+* Plus more supported endpoints
 
 Currently this package supports the following endpoint's:
 
-* [DeleteItem](services/deleteitem.md)
-* [GetInboxRules](services/getinboxrules.md)
-* [FindHiddenInboxRules](services/findhiddeninboxrules.md)
-* [GetSearchableMailboxes](services/getsearchablemailboxes.md)
-* [ResolveNames](services/resolvenames.md)
-* [SearchMailboxes](/services/searchmailboxes.md)
+* [AddDelegate](endpoint/adddelegate.md)
+* [ConvertId](endpoint/convertid.md)
+* [CreateFolder](endpoint/createfolder.md)
+* [CreateItem](endpoint/createitem.md)
+* [DeleteFolder](endpoint/deletefolder.md)
+* [DeleteItem](endpoint/deleteitem.md)
+* [ExecuteSearch](endpoint/executesearch.md)
+* [ExpandDL](endpoint/expanddl.md)
+* [FindFolder](endpoint/findfolder.md)
+* [FindItem](endpoint/finditem.md)
+* [GetAttachment](endpoint/getattachment.md)
+* [GetHiddenInboxRules](endpoint/gethiddeninboxrules.md)
+* [GetInboxRules](endpoint/getinboxrules.md)
+* [GetItem](endpoint/getitem.md)
+* [GetSearchableMailboxes](endpoint/getsearchablemailboxes.md)
+* [GetServiceConfiguration](endpoint/getserviceconfiguration.md)
+* [GetUserSettings](endpoint/getusersettings.md)
+* [ResolveNames](endpoint/resolvenames.md)
+* [SearchMailboxes](endpoint/searchmailboxes.md)
+* [SyncFolderHierarchy](endpoint/syncfolderhierarchy.md)
+* [SyncFolderItems](endpoint/syncfolderitems.md)
 
 
 ## Installation
@@ -58,122 +75,100 @@ pip install py-ews
 pip install py-ews
 ```
 
-## Usage example
+## Creating EWS Object
 
-The first step in using **py-ews** is that you need to create a [UserConfiguration](configuration/userconfiguration.md) object.  Think of this as all the connection information for Exchange Web Services.  An example of creating a [UserConfiguration](configuration/userconfiguration.md) using Office 365 Autodiscover is:
+When instantiating the `EWS` class you will need to provide credentials which will be used for all methods within the EWS class.
 
 ```python
-from pyews import UserConfiguration
+from pyews import EWS
 
-userconfig = UserConfiguration(
+ews = EWS(
       'myaccount@company.com',
       'Password1234'
 )
 ```
 
-
-If you would like to use an alternative [Autodiscover](configuration/autodiscover.md) endpoint (or any alternative endpoint) then please provide one using the `endpoint` named parameter:
+If you would like to use an alternative EWS URL then provide one using the `ews_url` parameter when instantiating the EWS class.
 
 ```python
-from pyews import UserConfiguration
+from pyews import EWS
 
-userconfig = UserConfiguration(
+ews = EWS(
       'myaccount@company.com',
       'Password1234',
-      endpoint='https://outlook.office365.com/autodiscover/autodiscover.svc'
+      ews_url='https://outlook.office365.com/autodiscover/autodiscover.svc'
 )
 ```
 
-For more information about creating a [UserConfiguration](configuration/userconfiguration.md) object, please see the full documentation.
+If you would like to specify a specific version of Exchange to use, you can provide that using the `exchange_version` parameter. By default `pyews` will attempt all Exchange versions as well as multiple static and generated EWS URLs.
 
-Now that you have a [UserConfiguration](configuration/userconfiguration.md) object, we can now use any of the available service endpoints.  This example will demonstrate how you can identify which mailboxes you have access to by using the [GetSearchableMailboxes](services/getsearchablemailboxes.md) EWS endpoint.
+Finally, if you would like to `impersonate_as` a specific user you must provide their primary SMTP address when instantiating the `EWS` class object:
 
-Once you have identified a list of mailbox reference ids, then you can begin searching all of those mailboxes by using the [SearchMailboxes](services/searchmailboxes.md) EWS endpoint.
-
-The returned results will then be deleted (moved to Deleted Items folder) from Exchange using the [DeleteItem](services/deleteitem.md) EWS endpoint.
 
 ```python
-from pyews import UserConfiguration
-from pyews import GetSearchableMailboxes
-from pyews import SearchMailboxes
-from pyews import DeleteItem
+from pyews import EWS
 
-userconfig = UserConfiguration(
+ews = EWS(
+      'myaccount@company.com',
+      'Password1234',
+      impersonate_as='myotheraccount@company.com'
+)
+```
+
+### Exchange Search Multi-Threading
+
+You can also specify `multi_threading=True` and when you search mailboxes we will use multi-threading to perform the search.
+
+## Using Provided Methods
+
+Once you have instantiated the EWS class with your credentials, you will have access to pre-exposed methods for each endpoint.  These methods are:
+
+* get_service_configuration
+* get_searchable_mailboxes
+* get_user_settings
+* resolve_names
+* execute_ews_search
+* execute_outlook_search
+* get_inbox_rules
+* get_hidden_inbox_rules
+* get_item
+* get_attachment
+* sync_folder_hierarchy
+* sync_folder_items
+* create_item
+* delete_item
+* search_and_delete_message
+* get_domain_settings
+* find_items
+* search_mailboxes_using_find_item
+* create_search_folder
+* find_search_folder
+* delete_search_folder
+
+## Access Classes Directly
+
+In some cases you may want to skip using the `EWS` interface class and build your own wrapper around `py-ews`.  To do this, you must first import the `Authentication` class and provide
+credential and other details before invoking a desired `endpoint`. Below is an example of this:
+
+```python
+from pyews import Authentication, GetSearchableMailboxes
+
+Authentication(
       'myaccount@company.com',
       'Password1234'
 )
 
-# get searchable mailboxes based on your accounts permissions
-referenceid_list = []
-for mailbox in GetSearchableMailboxes(userconfig).run():
-      referenceid_list.append(mailbox['reference_id'])
-
-# let's search all the referenceid_list items
-messages_found = []
-for search in SearchMailboxes(userconfig).run('subject:account', referenceid_list):
-      messages_found.append(search['id'])
-      # we can print the results first if we want
-      print(search['subject'])
-      print(search['id'])
-      print(search['sender'])
-      print(search['to_recipients'])
-      print(search['created_time'])
-      print(search['received_time'])
-      #etc.
-
-# if we wanted to now delete a specific message then we would call the DeleteItem 
-# class like this but we can also pass in the entire messages_found list
-deleted_message_response = DeleteItem(userconfig).run(messages_found[2])
-
-print(deleted_message_response)
+reference_id_list = []
+for mailbox in GetSearchableMailboxes().run():
+      reference_id_list.append(mailbox.get('reference_id'))
+      print(mailbox)
 ```
 
-The following is an example of the output returned when calling the above code:
-
-```text
-YOUR ACCOUNT IS ABOUT TO EXPIRE! UPGRADE NOW!!!
-AAMkAGZjOTlkOWExLTM2MDEtNGI3MS0..............
-Josh Rickard
-Research
-2019-02-28T18:28:36Z
-2019-02-28T18:28:36Z
-Upgrade Your Account!
-AAMkADAyNTZhNmMyLWNmZTctNDIyZC0..............
-Josh Rickard
-Josh Rickard 
-2019-01-24T18:41:11Z
-2019-01-24T18:41:11Z
-New or modified user account information
-AAMkAGZjOTlkOWExLTM2MDEtNGI3MS04.............. 
-Microsoft Online Services Team
-Research
-2019-01-24T18:38:06Z
-2019-01-24T18:38:06Z
-[{'MessageText': 'Succesfull'}]
-```
-
+As you can see, you must instantiate the `Authentication` class first before calling an endpoint.  By the way, you can import all `endpoints` directly without using the `EWS` interface.
 
 **For more examples and usage, please refer to the individual class documentation**
 
-* [Services](services/root.md)
-* [Configuration](configuration/root.md)
-
-## Development setup
-
-I have provided a [Dockerfile](https://github.com/swimlane/pyews/blob/master/Dockerfile) with all the dependencies and it is currently calling [test.py](https://github.com/swimlane/pyews/blob/master/Dockerfilebin\pyews_test.py).  If you want to test new features, I recommend that you use this [Dockerfile](https://github.com/swimlane/pyews/blob/master/Dockerfile).  You can call the following to build a new container, but keep the dependencies unless they have changed in your requirements.txt or any other changes to the [Dockerfile](https://github.com/swimlane/pyews/blob/master/Dockerfile).
-
-```
-docker build --force-rm -t pyews .
-```
-
-To run the container, use the following:
-
-``` 
-docker run pyews
-```
-
-I am new to Unit Testing, but I am working on that as time permits.  If you would like to help, I wouldn't be sad about it. :)
-
+* [Endpoint](endpoint/root.md)
 
 ## Release History
  
@@ -181,6 +176,8 @@ I am new to Unit Testing, but I am working on that as time permits.  If you woul
     * Initial release of py-ews and it is still considered a work in progress
 * 2.0.0
    * Revamped logic and overhauled all endpoints and classes
+* 3.0.0
+   * Refactored completely - this can be considered a new version
 
 
 ## Meta
@@ -202,7 +199,8 @@ Distributed under the MIT license. See ``LICENSE`` for more information.
    :maxdepth: 2
    :caption: Contents:
 
-   services/root
-   configuration/root
+   core/root
+   endpoint/root
+   service/root
    utils/root
 ```
