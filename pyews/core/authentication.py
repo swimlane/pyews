@@ -30,7 +30,7 @@ class AuthenticationProperties(type):
 
     @oauth2_authorization_type.setter
     def oauth2_authorization_type(cls, value):
-        if value in ['legacy_app_flow', 'auth_code_grant', 'client_credentials_grant', 'backend_app_flow', 'web_application_flow', 'implicit_grant_flow']:
+        if value in ['interactive_auth_code_grant', 'legacy_app_flow', 'auth_code_grant', 'client_credentials_grant', 'backend_app_flow', 'web_application_flow', 'implicit_grant_flow']:
             cls._oauth2_authorization_type = value
             cls.__set_initial_property_values()
 
