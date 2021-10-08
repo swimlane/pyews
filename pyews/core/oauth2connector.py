@@ -85,6 +85,29 @@ class OAuth2Connector:
         url_parse = url_parse._replace(query=url_new_query)
         return urlunparse(url_parse)
 
+    def interactive_auth_code_grant(self):
+        oauth = OAuth2Session(
+            client_id=self.client_id,
+            redirect_uri=self.redirect_uri,
+            scope=self.scope
+        )
+        authorization_url, state = oauth.authorization_url(
+            self.authorize_url,
+        )
+        auth_code = self.__prompt_user(authorization_url)
+        response = self.session.request(
+            'POST',
+            self.token_url,
+            data={
+                "client_id": self.client_id,
+                "code": auth_code,
+                "grant_type": "authorization_code",
+                "redirect_uri": self.redirect_uri,
+                "client_secret": self.client_secret
+            }
+        )
+        return response.json()
+
     def auth_code_grant(self):
         """Authorization Code Flow Grant
         Reference: https://docs.microsoft.com/en-us/azure/active-directory/develop/v2-oauth2-auth-code-flow
